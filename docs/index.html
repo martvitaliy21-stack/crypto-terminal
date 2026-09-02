@@ -302,7 +302,7 @@ function bot(){
     tile('капитал',cur.toFixed(2)+' $',`старт ${start.toFixed(0)} $ · ${new Date(B.started).toLocaleDateString('ru-RU')}`),
     tile('результат',(pnl>=0?'+':'')+usd(pnl),pct(pnlp,2),cls(pnl)),
     tile('BTC без бота',bh?bh.toFixed(2)+' $':'—',bh?pct((bh/start-1)*100,2)+' buy & hold':'',bh?cls(bh-start):''),
-    tile('открыто',pos.length+' из '+B.config.max_positions,'нереализовано '+(unreal>=0?'+':'')+usd(unreal),cls(unreal)),
+    tile('открыто',pos.length+' из '+B.config.max_positions,'нереализовано '+(unreal>=0?'+':'')+usd(unreal)),
     tile('сделок',tr.length,tr.length?`выигрышных ${Math.round(wins/tr.length*100)}%`:'ждёт сигнала'),
     tile('макс. просадка',pct(dd*100,1),'от пика капитала',dd<-0.1?'neg':''),
     tile('свободно',B.cash.toFixed(2)+' $','в USDT, не в позициях'),
@@ -355,7 +355,7 @@ function lineChart(cv,cfg){
   for(let k=0;k<=4;k++){const yv=ti(lo+(hi-lo)*k/4),y=Y(yv);g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();g.fillText(cfg.fmtY?cfg.fmtY(yv):fmtP(yv),pl.l-6,y+3);}
   g.textAlign='center';const step=Math.max(1,Math.round(n/6));
   for(let i=0;i<n;i+=step){g.fillText(cfg.labels[i]?.slice(cfg.labelSlice??5)??'',X(i),H-6);}
-  if(cfg.split!=null){const x=X(cfg.split);g.setLineDash([3,3]);g.strokeStyle=C.border;g.beginPath();g.moveTo(x,pl.t);g.lineTo(x,H-pl.b);g.stroke();g.setLineDash([]);g.fillStyle=C.text;g.textAlign='left';g.fillText(cfg.splitLabel??'прогноз →',x+4,pl.t+10);}
+  if(cfg.split!=null){const x=X(cfg.split);g.setLineDash([3,3]);g.strokeStyle=C.border;g.beginPath();g.moveTo(x,pl.t);g.lineTo(x,H-pl.b);g.stroke();g.setLineDash([]);g.fillStyle=C.text;const lbl=cfg.splitLabel??'прогноз →';if(x>W-pl.r-70){g.textAlign='right';g.fillText(lbl.replace(' →',''),x-4,pl.t+10);}else{g.textAlign='left';g.fillText(lbl,x+4,pl.t+10);}}
   if(cfg.zero){const y=Y(0);g.strokeStyle=C.border;g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();}
   for(const b of cfg.bands||[]){g.fillStyle=b.color;g.beginPath();let st=false;
     for(let i=0;i<n;i++){const v=b.hi[i];if(v==null)continue;if(!st){g.moveTo(X(i),Y(v));st=true;}else g.lineTo(X(i),Y(v));}
