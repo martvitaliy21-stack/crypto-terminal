@@ -5,73 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ГРОШ TERMINAL</title>
 <meta name="description" content="Связи и корреляции крипторынка: беты, регрессионные каналы, интервалы предсказания, lead/lag к BTC. Обновляется каждый час.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap">
 <style>
-:root{--bg:#0b0e11;--panel:#12161c;--panel2:#171c23;--border:#232a33;--text:#d5d9de;--muted:#7c8590;
- --amber:#f5a623;--green:#3fb950;--red:#f85149;--blue:#58a6ff}
+/* ---- палитры (переключаются атрибутом data-skin на <html>) ---- */
+:root,:root[data-skin="vault"]{color-scheme:dark;
+ --bg:#0b100e;--panel:#111915;--panel2:#17221d;--border:#23302a;--grid:#1a2420;
+ --text:#e4e9e5;--muted:#8a9a91;--help-bg:#0e1512;--help-text:#b3bfb8;
+ --accent:#d3ac4e;--accent-rgb:211,172,78;--on-accent:#1a1406;
+ --up:#4fd19a;--down:#f2705f;--info:#72b4ff;--info-rgb:114,180,255}
+:root[data-skin="brass"]{color-scheme:dark;
+ --bg:#0c0f14;--panel:#12161d;--panel2:#191f28;--border:#262d38;--grid:#1a2029;
+ --text:#e2e5ea;--muted:#8a93a0;--help-bg:#0f1319;--help-text:#b1b8c2;
+ --accent:#d9a441;--accent-rgb:217,164,65;--on-accent:#1a1204;
+ --up:#3ecf8e;--down:#f0655f;--info:#6ea8ff;--info-rgb:110,168,255}
+:root[data-skin="paper"]{color-scheme:light;
+ --bg:#e9ebee;--panel:#ffffff;--panel2:#f3f4f6;--border:#d3d7de;--grid:#e6e8ec;
+ --text:#171b22;--muted:#5f6873;--help-bg:#f7f8fa;--help-text:#444c57;
+ --accent:#9c6f14;--accent-rgb:156,111,20;--on-accent:#ffffff;
+ --up:#1e8f5e;--down:#c73f38;--info:#2b63c6;--info-rgb:43,99,198}
 *{box-sizing:border-box}
-html{color-scheme:dark}
-body{margin:0;background:var(--bg);color:var(--text);font:12px/1.45 "SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace}
-header{display:flex;align-items:center;gap:18px;padding:8px 14px;border-bottom:1px solid var(--border);background:#0e1216;flex-wrap:wrap}
-header .brand{color:var(--amber);font-weight:700;letter-spacing:.14em;font-size:13px}
-.beta{font-size:9px;letter-spacing:.15em;color:var(--bg);background:var(--amber);padding:1px 5px;border-radius:2px;margin-left:-10px}
+:root{--mono:"IBM Plex Mono","SF Mono",Menlo,Consolas,monospace;--sans:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,sans-serif;--serif:"Playfair Display",Georgia,serif}
+body{margin:0;background:var(--bg);color:var(--text);font:12px/1.45 var(--mono);font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;gap:18px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--panel);flex-wrap:wrap}
+header .brand{font:700 17px/1 var(--serif);color:var(--accent);letter-spacing:.02em}
+header .brand small{font:500 10px/1 var(--mono);color:var(--muted);letter-spacing:.2em;margin-left:6px;vertical-align:2px}
+.beta{font-size:9px;letter-spacing:.15em;color:var(--on-accent);background:var(--accent);padding:2px 5px;border-radius:2px;margin-left:-10px;font-weight:600}
 header .kv{color:var(--muted)} header .kv b{color:var(--text);font-weight:600}
-header .regime{padding:2px 8px;border:1px solid var(--border);border-radius:3px}
-header .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+header .regime{padding:2px 8px;border:1px solid var(--border);border-radius:3px;font-size:11px}
+.regime[data-level=hot]{color:var(--down)} .regime[data-level=mid]{color:var(--accent)} .regime[data-level=cool]{color:var(--up)}
+header .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .tgl{background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:3px 9px;font:inherit;font-size:11px;cursor:pointer;border-radius:3px}
-.tgl.on{border-color:var(--amber);color:var(--amber)}
+.tgl.on{border-color:var(--accent);color:var(--accent)}
+.skins{display:flex;gap:4px;align-items:center}
+.skins button{display:flex;align-items:center;gap:5px;background:var(--panel2);color:var(--muted);border:1px solid var(--border);padding:3px 8px;font:inherit;font-size:11px;cursor:pointer;border-radius:3px}
+.skins button i{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid rgba(128,128,128,.4)}
+.skins button.on{color:var(--text);border-color:var(--accent)}
 .grid{display:grid;grid-template-columns:400px 1fr 360px;gap:8px;padding:8px}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;display:flex;flex-direction:column;min-width:0}
-.panel h3{margin:0;padding:6px 10px;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--amber);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel h3{margin:0;padding:6px 10px;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--accent);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .panel h3 .sp{flex:1}
 .btns{display:flex;gap:2px}
 .btns button{background:var(--panel2);color:var(--muted);border:1px solid var(--border);padding:1px 7px;font:inherit;font-size:10px;cursor:pointer;border-radius:2px}
-.btns button.on{color:#000;background:var(--amber);border-color:var(--amber)}
-.btns button:focus-visible,.tgl:focus-visible{outline:1px solid var(--blue);outline-offset:1px}
+.btns button.on{color:var(--on-accent);background:var(--accent);border-color:var(--accent)}
+.btns button:focus-visible,.tgl:focus-visible,.skins button:focus-visible{outline:1px solid var(--info);outline-offset:1px}
 .body{padding:8px 10px;flex:1;min-height:0}
 canvas{display:block}
-table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:11px}
 th{color:var(--muted);font-weight:500;text-align:right;padding:3px 5px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
-td{text-align:right;padding:3px 5px;border-bottom:1px solid #1a1f26;white-space:nowrap;cursor:pointer}
-tr:hover td{background:var(--panel2)} tr.sel td{background:#1f2630} tr.sel td:first-child{color:var(--amber);font-weight:700}
-.pos{color:var(--green)} .neg{color:var(--red)} .dim{color:var(--muted)}
+td{text-align:right;padding:3px 5px;border-bottom:1px solid var(--grid);white-space:nowrap;cursor:pointer}
+tr:hover td{background:var(--panel2)} tr.sel td{background:var(--panel2);box-shadow:inset 2px 0 0 var(--accent)} tr.sel td:first-child{color:var(--accent);font-weight:600}
+.pos{color:var(--up)} .neg{color:var(--down)} .dim{color:var(--muted)}
 .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:8px 10px;border-bottom:1px solid var(--border)}
 .stat{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:5px 8px;min-width:0}
-.stat .l{color:var(--muted);font-size:10px;letter-spacing:.05em} .stat .v{font-size:15px;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums} .stat .s{font-size:10px;color:var(--muted)}
+.stat .l{color:var(--muted);font-size:10px;letter-spacing:.05em} .stat .v{font-size:15px;font-weight:600;margin-top:1px} .stat .s{font-size:10px;color:var(--muted)}
 .legend{display:flex;gap:14px;padding:4px 10px 0;color:var(--muted);font-size:10px;flex-wrap:wrap}
 .legend i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:5px}
 .links{display:flex;flex-direction:column;gap:3px;font-size:11px}
 .links div{display:flex;justify-content:space-between;padding:2px 4px;background:var(--panel2);border-radius:2px}
 .bar{height:6px;background:var(--border);border-radius:2px;position:relative;flex:1;margin:0 8px;align-self:center}
-.bar i{position:absolute;top:0;height:100%;background:var(--amber);border-radius:2px}
-.tip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--border);padding:4px 8px;font-size:11px;display:none;z-index:9;white-space:pre}
-/* пояснения */
-.help{padding:8px 10px 9px;color:#aab2bb;font-size:11px;line-height:1.55;border-top:1px dashed var(--border);background:#0f1317}
-.help p{margin:0 0 5px} .help p:last-child{margin:0}
-.help b{color:var(--amber);font-weight:600}
-.help em{color:var(--text);font-style:normal}
-.help dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:3px 10px}
-.help dt{color:var(--amber);font-weight:600;white-space:nowrap} .help dd{margin:0}
+.bar i{position:absolute;top:0;height:100%;background:var(--accent);border-radius:2px}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:4px 8px;font-size:11px;display:none;z-index:9;white-space:pre}
+/* пояснения — набраны гротеском, чтобы читались как текст, а не как код */
+.help{padding:9px 12px 10px;color:var(--help-text);font:12.5px/1.6 var(--sans);border-top:1px dashed var(--border);background:var(--help-bg)}
+.help p{margin:0 0 6px;max-width:72ch} .help p:last-child{margin:0}
+.help b{color:var(--accent);font-weight:600}
+.help em{color:var(--text);font-style:normal;font-weight:500}
+.help dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:4px 12px}
+.help dt{color:var(--accent);font:600 11px/1.6 var(--mono);white-space:nowrap} .help dd{margin:0}
 body.nohelp .help,body.nohelp .intro{display:none}
-.intro{grid-column:1/-1;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:4px;color:#aab2bb;font-size:11.5px;line-height:1.6;max-width:none}
-.intro b{color:var(--amber)} .intro .warn{color:var(--text)}
+.intro{grid-column:1/-1;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:4px;color:var(--help-text);font:13px/1.65 var(--sans)}
+.intro b{color:var(--accent)} .intro .warn{color:var(--text);font-weight:500}
 .main{grid-row:span 2}
 .wide{grid-column:1/3}
-footer{padding:12px 14px 20px;color:var(--muted);font-size:10.5px;line-height:1.6;border-top:1px solid var(--border);margin-top:4px}
-footer a{color:var(--amber);text-decoration:none}
+footer{padding:12px 14px 20px;color:var(--muted);font:11.5px/1.6 var(--sans);border-top:1px solid var(--border);margin-top:4px}
+footer b{color:var(--text)}
 abbr{text-decoration:underline dotted;cursor:help}
+@media(prefers-reduced-motion:no-preference){.btns button,.tgl,.skins button{transition:color .15s,border-color .15s,background .15s}}
 @media(max-width:1200px){.grid{grid-template-columns:1fr 1fr}.main{grid-column:1/3;grid-row:auto}.wide{grid-column:1/3}}
 @media(max-width:800px){.grid{grid-template-columns:1fr}.main,.wide{grid-column:auto}.stats{grid-template-columns:repeat(3,1fr)}header{gap:10px}}
 </style>
 </head>
 <body>
 <header>
-  <span class="brand">ГРОШ&nbsp;TERMINAL</span><span class="beta">BETA</span>
+  <span class="brand">ГРОШ<small>TERMINAL</small></span><span class="beta">BETA</span>
   <span class="kv">BTC <b id="hBtc">—</b></span>
   <span class="kv">ETH <b id="hEth">—</b></span>
   <span class="kv"><abbr title="Средняя попарная корреляция дневных доходностей всех монет за 30 дней">ср. корреляция 30д</abbr> <b id="hAvg">—</b></span>
   <span class="kv">данные <b id="hGen">—</b></span>
-  <span class="right"><span class="regime" id="hRegime">—</span><button class="tgl on" id="helpToggle" type="button">пояснения: вкл</button></span>
+  <span class="right"><span class="regime" id="hRegime">—</span><span class="skins" id="skins" title="Цветовая схема"><button type="button" data-skin="vault"><i style="background:#d3ac4e;box-shadow:inset 0 0 0 2px #0b100e"></i>Сейф</button><button type="button" data-skin="brass"><i style="background:#d9a441;box-shadow:inset 0 0 0 2px #0c0f14"></i>Латунь</button><button type="button" data-skin="paper"><i style="background:#9c6f14;box-shadow:inset 0 0 0 2px #ffffff"></i>Бумага</button></span><button class="tgl on" id="helpToggle" type="button">пояснения: вкл</button></span>
 </header>
 <div class="grid">
   <div class="intro">
@@ -105,10 +128,10 @@ abbr{text-decoration:underline dotted;cursor:help}
     </h3>
     <div class="stats" id="mStats"></div>
     <div class="legend">
-      <span><i style="background:#e6edf3"></i>цена</span>
-      <span><i style="background:var(--amber)"></i>регрессия ±2σ</span>
-      <span><i style="background:var(--amber);opacity:.5;height:6px"></i>95% интервал предсказания</span>
-      <span><i style="background:var(--blue)"></i>конус дрейф/волатильность 95%</span>
+      <span><i style="background:var(--text)"></i>цена</span>
+      <span><i style="background:var(--accent)"></i>регрессия ±2σ</span>
+      <span><i style="background:var(--accent);opacity:.5;height:6px"></i>95% интервал предсказания</span>
+      <span><i style="background:var(--info)"></i>конус дрейф/волатильность 95%</span>
     </div>
     <div class="body"><canvas id="main" height="380"></canvas></div>
     <div class="help">
@@ -168,7 +191,13 @@ abbr{text-decoration:underline dotted;cursor:help}
 
 <script>
 const $=s=>document.querySelector(s);
-const C={bg:'#12161c',grid:'#1c2229',text:'#7c8590',amber:'#f5a623',blue:'#58a6ff',green:'#3fb950',red:'#f85149',white:'#e6edf3'};
+let C={};
+function readTheme(){const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
+  C={bg:v('--bg'),panel:v('--panel'),grid:v('--grid'),border:v('--border'),text:v('--muted'),amber:v('--accent'),amberRgb:v('--accent-rgb'),blue:v('--info'),blueRgb:v('--info-rgb'),green:v('--up'),red:v('--down'),white:v('--text'),muted:v('--muted')};}
+const SKINS={vault:'Сейф',brass:'Латунь',paper:'Бумага'};
+function applySkin(name){if(!SKINS[name])name='vault';document.documentElement.dataset.skin=name;try{localStorage.setItem('grosh_skin',name);}catch(e){}
+  document.querySelectorAll('#skins button').forEach(b=>b.classList.toggle('on',b.dataset.skin===name));if(D)render();}
+(function(){let sk=null;try{sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'vault';})();
 let D, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
 const fmtP=v=>v>=1000?v.toLocaleString('en',{maximumFractionDigits:0}):v>=1?v.toFixed(v>=100?1:v>=10?2:3):v.toPrecision(3);
 const pct=(v,d=1)=>v==null?'—':Math.abs(v)>999?(v>0?'>+999%':'<-999%'):(v>0?'+':'')+v.toFixed(d)+'%';
@@ -184,7 +213,7 @@ function init(){
   const reg=$('#hRegime');
   reg.textContent=a>0.7?'РЕЖИМ: ЕДИНЫЙ БЛОК — всё ходит за BTC':a>0.45?'РЕЖИМ: УМЕРЕННАЯ СВЯЗЬ':'РЕЖИМ: РАЗНОНАПРАВЛЕННЫЙ — альты живут своей жизнью';
   reg.title='Режим рынка по средней корреляции за 30 дней: выше 0.7 — всё падает и растёт вместе; ниже 0.45 — монеты расходятся';
-  reg.style.color=a>0.7?C.red:a>0.45?C.amber:C.green;
+  reg.dataset.level=a>0.7?'hot':a>0.45?'mid':'cool';
   for(const w of D.windows){const b=document.createElement('button');b.textContent=w+'д';b.className=w===win?'on':'';b.onclick=()=>{win=w;render();};$('#winBtns').append(b);}
   for(const w of D.corr_windows){const b=document.createElement('button');b.textContent=w+'д';b.className=w===corrWin?'on':'';b.onclick=()=>{corrWin=w;render();};$('#corrBtns').append(b);}
   $('#layerBtns').querySelectorAll('button').forEach(b=>b.onclick=()=>{layers[b.dataset.l]=!layers[b.dataset.l];b.classList.toggle('on');drawMain();});
@@ -192,10 +221,13 @@ function init(){
   const ht=$('#helpToggle');let help=true;try{help=localStorage.getItem('grosh_help')!=='0';}catch(e){}
   const applyHelp=()=>{document.body.classList.toggle('nohelp',!help);ht.classList.toggle('on',help);ht.textContent='пояснения: '+(help?'вкл':'выкл');render();};
   ht.onclick=()=>{help=!help;try{localStorage.setItem('grosh_help',help?'1':'0');}catch(e){}applyHelp();};
+  document.querySelectorAll('#skins button').forEach(b=>b.onclick=()=>applySkin(b.dataset.skin));
+  applySkin(document.documentElement.dataset.skin);
   window.addEventListener('resize',()=>render());
   applyHelp();
 }
 function render(){
+  readTheme();
   $('#winBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===win+'д'));
   $('#corrBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===corrWin+'д'));
   watchlist();drawMain();heat();links();roll();lag();
@@ -215,12 +247,12 @@ function lineChart(cv,cfg){
   let lo=Infinity,hi=-Infinity;for(const s of [...cfg.series,...(cfg.bands||[]).flatMap(b=>[{data:b.lo},{data:b.hi}])])for(const v of s.data)if(v!=null&&isFinite(v)){lo=Math.min(lo,tf(v));hi=Math.max(hi,tf(v));}
   if(cfg.yMin!=null){lo=tf(cfg.yMin);hi=tf(cfg.yMax);}else{const p=(hi-lo)*.05;lo-=p;hi+=p;}
   const X=i=>pl.l+i/(n-1)*iw,Y=v=>pl.t+(hi-tf(v))/(hi-lo)*ih;
-  g.strokeStyle=C.grid;g.fillStyle=C.text;g.font='10px Menlo,monospace';g.textAlign='right';g.lineWidth=1;
+  g.strokeStyle=C.grid;g.fillStyle=C.text;g.font='10px "IBM Plex Mono",Menlo,monospace';g.textAlign='right';g.lineWidth=1;
   for(let k=0;k<=4;k++){const yv=ti(lo+(hi-lo)*k/4),y=Y(yv);g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();g.fillText(cfg.fmtY?cfg.fmtY(yv):fmtP(yv),pl.l-6,y+3);}
   g.textAlign='center';const step=Math.max(1,Math.round(n/6));
   for(let i=0;i<n;i+=step){g.fillText(cfg.labels[i]?.slice(cfg.labelSlice??5)??'',X(i),H-6);}
-  if(cfg.split!=null){const x=X(cfg.split);g.setLineDash([3,3]);g.strokeStyle='#3a4450';g.beginPath();g.moveTo(x,pl.t);g.lineTo(x,H-pl.b);g.stroke();g.setLineDash([]);g.fillStyle=C.text;g.textAlign='left';g.fillText('прогноз →',x+4,pl.t+10);}
-  if(cfg.zero){const y=Y(0);g.strokeStyle='#3a4450';g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();}
+  if(cfg.split!=null){const x=X(cfg.split);g.setLineDash([3,3]);g.strokeStyle=C.border;g.beginPath();g.moveTo(x,pl.t);g.lineTo(x,H-pl.b);g.stroke();g.setLineDash([]);g.fillStyle=C.text;g.textAlign='left';g.fillText('прогноз →',x+4,pl.t+10);}
+  if(cfg.zero){const y=Y(0);g.strokeStyle=C.border;g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();}
   for(const b of cfg.bands||[]){g.fillStyle=b.color;g.beginPath();let st=false;
     for(let i=0;i<n;i++){const v=b.hi[i];if(v==null)continue;if(!st){g.moveTo(X(i),Y(v));st=true;}else g.lineTo(X(i),Y(v));}
     for(let i=n-1;i>=0;i--){const v=b.lo[i];if(v==null)continue;g.lineTo(X(i),Y(v));}g.closePath();g.fill();}
@@ -232,7 +264,7 @@ function drawMain(){
   const P=D.prices[s].slice(-win);const n=win+hz;const pad=a=>Array(win).fill(null).concat(a);
   const series=[{data:P.concat(Array(hz).fill(null)),color:C.white,width:1.5}];const bands=[];
   if(layers.reg){series.push({data:r.fit.concat(r.proj_mid),color:C.amber,width:1.2},{data:r.lo.concat(Array(hz).fill(null)),color:C.amber,dash:[4,3],width:.8},{data:r.hi.concat(Array(hz).fill(null)),color:C.amber,dash:[4,3],width:.8});
-    bands.push({lo:pad(r.proj_lo),hi:pad(r.proj_hi),color:'rgba(245,166,35,.16)'});}
+    bands.push({lo:pad(r.proj_lo),hi:pad(r.proj_hi),color:`rgba(${C.amberRgb},.18)`});}
   if(layers.cone){series.push({data:pad(c.mid),color:C.blue,dash:[2,3]},{data:pad(c.lo),color:C.blue,width:.8},{data:pad(c.hi),color:C.blue,width:.8});}
   lineChart($('#main'),{n,series,bands,log:layers.log,labels:D.dates.slice(-win).concat(D.proj_dates),split:win-1});
   $('#mTitle').textContent=`${s}/USDT — ${fmtP(st.price)}   регрессионный канал ${win}д + проекция ${hz}д`;
@@ -248,10 +280,10 @@ function drawMain(){
 }
 function heat(){
   const cv=$('#heat');const [g,W,H]=setup(cv);const S=D.symbols,M=D.corr[String(corrWin)],n=S.length;const off=34;const cw=(W-off)/n,ch=(H-off)/n;
-  const col=v=>{if(v==null)return '#000';const a=Math.min(1,Math.abs(v));return v>=0?`rgba(245,166,35,${(a*a).toFixed(2)})`:`rgba(88,166,255,${(a*a).toFixed(2)})`;};
-  g.font='9px Menlo,monospace';g.fillStyle=C.text;
+  const col=v=>{if(v==null)return '#000';const a=Math.min(1,Math.abs(v));return v>=0?`rgba(${C.amberRgb},${(a*a).toFixed(2)})`:`rgba(${C.blueRgb},${(a*a).toFixed(2)})`;};
+  g.font='9px "IBM Plex Mono",Menlo,monospace';g.fillStyle=C.text;
   for(let i=0;i<n;i++){g.textAlign='right';g.fillText(S[i],off-3,off+i*ch+ch/2+3);g.save();g.translate(off+i*cw+cw/2+3,off-3);g.rotate(-Math.PI/2);g.textAlign='left';g.fillText(S[i],0,0);g.restore();}
-  for(let i=0;i<n;i++)for(let j=0;j<n;j++){g.fillStyle='#0b0e11';g.fillRect(off+j*cw,off+i*ch,cw,ch);g.fillStyle=col(M[i][j]);g.fillRect(off+j*cw+.5,off+i*ch+.5,cw-1,ch-1);}
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){g.fillStyle=C.bg;g.fillRect(off+j*cw,off+i*ch,cw,ch);g.fillStyle=col(M[i][j]);g.fillRect(off+j*cw+.5,off+i*ch+.5,cw-1,ch-1);}
   const si=S.indexOf(sel);g.strokeStyle=C.white;g.lineWidth=1;g.strokeRect(off,off+si*ch,W-off,ch);g.strokeRect(off+si*cw,off,cw,H-off);
   cv.onmousemove=e=>{const b=cv.getBoundingClientRect();const j=Math.floor((e.clientX-b.left-off)/cw),i=Math.floor((e.clientY-b.top-off)/ch);const t=$('#tip');
     if(i<0||j<0||i>=n||j>=n){t.style.display='none';return;}t.style.display='block';t.style.left=e.clientX+12+'px';t.style.top=e.clientY+12+'px';t.textContent=`${S[i]} × ${S[j]}  ρ=${M[i][j].toFixed(2)} (${corrWin}д)`;};
@@ -266,11 +298,11 @@ function links(){
 }
 function roll(){
   const a=D.avg_corr.values,s=D.roll_corr[sel];
-  lineChart($('#roll'),{n:a.length,series:[{data:a,color:'#5a6470',width:1},{data:s,color:C.amber,width:1.4}],labels:D.roll_dates,yMin:-1,yMax:1,fmtY:v=>v.toFixed(1),zero:true,padL:40});
+  lineChart($('#roll'),{n:a.length,series:[{data:a,color:C.border,width:1.4},{data:s,color:C.amber,width:1.4}],labels:D.roll_dates,yMin:-1,yMax:1,fmtY:v=>v.toFixed(1),zero:true,padL:40});
 }
 function lag(){
   const cv=$('#lag');const [g,W,H]=setup(cv);const L=D.leadlag[sel];const ks=Object.keys(L).map(Number).sort((a,b)=>a-b);const pl=40;const bw=(W-pl-10)/ks.length;const mid=H/2-6;
-  g.strokeStyle=C.grid;g.beginPath();g.moveTo(pl,mid);g.lineTo(W-10,mid);g.stroke();g.font='10px Menlo,monospace';g.fillStyle=C.text;g.textAlign='right';g.fillText('+1',pl-4,14);g.fillText('-1',pl-4,H-12);
+  g.strokeStyle=C.grid;g.beginPath();g.moveTo(pl,mid);g.lineTo(W-10,mid);g.stroke();g.font='10px "IBM Plex Mono",Menlo,monospace';g.fillStyle=C.text;g.textAlign='right';g.fillText('+1',pl-4,14);g.fillText('-1',pl-4,H-12);
   ks.forEach((k,i)=>{const v=L[k];const h=v*(mid-14);g.fillStyle=k===0?C.white:v>0?C.amber:C.blue;g.fillRect(pl+i*bw+bw*.2,mid-Math.max(h,0),bw*.6,Math.abs(h));
     g.fillStyle=C.text;g.textAlign='center';g.fillText((k>0?'+':'')+k+'д',pl+i*bw+bw/2,H-2);g.fillText(v.toFixed(2),pl+i*bw+bw/2,mid-Math.max(h,0)-4);});
   g.fillStyle=C.text;g.textAlign='left';g.fillText(sel==='BTC'?'BTC к самому себе':`BTC(t) × ${sel}(t+k)`,pl,12);
