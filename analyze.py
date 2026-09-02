@@ -19,7 +19,7 @@ UNIVERSE = {  # тикер: id на CoinGecko (для запасного ист�
     "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin", "XRP": "ripple",
     "ADA": "cardano", "DOGE": "dogecoin", "AVAX": "avalanche-2", "LINK": "chainlink", "DOT": "polkadot",
     "LTC": "litecoin", "TRX": "tron", "ATOM": "cosmos", "NEAR": "near", "SUI": "sui",
-    "UNI": "uniswap", "AAVE": "aave", "POL": "polygon-ecosystem-token", "PEPE": "pepe", "TON": "the-open-network",
+    "UNI": "uniswap", "AAVE": "aave", "POL": "polygon-ecosystem-token", "PEPE": "pepe", "TON": "the-open-network", "ZEC": "zcash",
 }
 WINDOWS = [30, 90, 180]
 CORR_WINDOWS = [30, 90, 365]

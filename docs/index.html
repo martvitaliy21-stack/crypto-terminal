@@ -9,16 +9,16 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap">
 <style>
 /* ---- палитры (переключаются атрибутом data-skin на <html>) ---- */
-:root,:root[data-skin="vault"]{color-scheme:dark;
+:root,:root[data-skin="graphite"]{color-scheme:dark;
+ --bg:#0c0f14;--panel:#12161d;--panel2:#191f28;--border:#262d38;--grid:#1a2029;
+ --text:#e2e5ea;--muted:#8a93a0;--help-bg:#0f1319;--help-text:#b1b8c2;
+ --accent:#a99bf5;--accent-rgb:169,155,245;--on-accent:#14102b;
+ --up:#3ecf8e;--down:#f0655f;--info:#4fc3e8;--info-rgb:79,195,232}
+:root[data-skin="vault"]{color-scheme:dark;
  --bg:#0b100e;--panel:#111915;--panel2:#17221d;--border:#23302a;--grid:#1a2420;
  --text:#e4e9e5;--muted:#8a9a91;--help-bg:#0e1512;--help-text:#b3bfb8;
  --accent:#d3ac4e;--accent-rgb:211,172,78;--on-accent:#1a1406;
  --up:#4fd19a;--down:#f2705f;--info:#72b4ff;--info-rgb:114,180,255}
-:root[data-skin="brass"]{color-scheme:dark;
- --bg:#0c0f14;--panel:#12161d;--panel2:#191f28;--border:#262d38;--grid:#1a2029;
- --text:#e2e5ea;--muted:#8a93a0;--help-bg:#0f1319;--help-text:#b1b8c2;
- --accent:#d9a441;--accent-rgb:217,164,65;--on-accent:#1a1204;
- --up:#3ecf8e;--down:#f0655f;--info:#6ea8ff;--info-rgb:110,168,255}
 :root[data-skin="paper"]{color-scheme:light;
  --bg:#e9ebee;--panel:#ffffff;--panel2:#f3f4f6;--border:#d3d7de;--grid:#e6e8ec;
  --text:#171b22;--muted:#5f6873;--help-bg:#f7f8fa;--help-text:#444c57;
@@ -79,12 +79,22 @@ body.nohelp .help,body.nohelp .intro{display:none}
 .intro b{color:var(--accent)} .intro .warn{color:var(--text);font-weight:500}
 .main{grid-row:span 2}
 .wide{grid-column:1/3}
+.full{grid-column:1/-1}
+.tv{padding:0;background:var(--bg)} .tv iframe{display:block;width:100%;height:520px;border:0}
 footer{padding:12px 14px 20px;color:var(--muted);font:11.5px/1.6 var(--sans);border-top:1px solid var(--border);margin-top:4px}
 footer b{color:var(--text)}
 abbr{text-decoration:underline dotted;cursor:help}
-@media(prefers-reduced-motion:no-preference){.btns button,.tgl,.skins button{transition:color .15s,border-color .15s,background .15s}}
-@media(max-width:1200px){.grid{grid-template-columns:1fr 1fr}.main{grid-column:1/3;grid-row:auto}.wide{grid-column:1/3}}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.main,.wide{grid-column:auto}.stats{grid-template-columns:repeat(3,1fr)}header{gap:10px}}
+@media(prefers-reduced-motion:no-preference){
+ .btns button,.tgl,.skins button{transition:color .15s,border-color .15s,background .15s}
+ body.boot header{animation:fadeIn .5s ease-out both}
+ body.boot .intro,body.boot .panel{animation:rise .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*90ms + 120ms)}
+ body.boot .brand{animation:brand .9s ease-out both}
+}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes brand{0%{opacity:0;letter-spacing:.3em}60%{opacity:1}100%{letter-spacing:.02em}}
+@media(max-width:1200px){.grid{grid-template-columns:1fr 1fr}.main{grid-column:1/3;grid-row:auto}.wide,.full{grid-column:1/3}}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.main,.wide,.full{grid-column:auto}.tv iframe{height:380px}.stats{grid-template-columns:repeat(3,1fr)}header{gap:10px}}
 </style>
 </head>
 <body>
@@ -94,7 +104,7 @@ abbr{text-decoration:underline dotted;cursor:help}
   <span class="kv">ETH <b id="hEth">—</b></span>
   <span class="kv"><abbr title="Средняя попарная корреляция дневных доходностей всех монет за 30 дней">ср. корреляция 30д</abbr> <b id="hAvg">—</b></span>
   <span class="kv">данные <b id="hGen">—</b></span>
-  <span class="right"><span class="regime" id="hRegime">—</span><span class="skins" id="skins" title="Цветовая схема"><button type="button" data-skin="vault"><i style="background:#d3ac4e;box-shadow:inset 0 0 0 2px #0b100e"></i>Сейф</button><button type="button" data-skin="brass"><i style="background:#d9a441;box-shadow:inset 0 0 0 2px #0c0f14"></i>Латунь</button><button type="button" data-skin="paper"><i style="background:#9c6f14;box-shadow:inset 0 0 0 2px #ffffff"></i>Бумага</button></span><button class="tgl on" id="helpToggle" type="button">пояснения: вкл</button></span>
+  <span class="right"><span class="regime" id="hRegime">—</span><span class="skins" id="skins" title="Цветовая схема"><button type="button" data-skin="graphite"><i style="background:#a99bf5;box-shadow:inset 0 0 0 2px #0c0f14"></i>Графит</button><button type="button" data-skin="vault"><i style="background:#d3ac4e;box-shadow:inset 0 0 0 2px #0b100e"></i>Сейф</button><button type="button" data-skin="paper"><i style="background:#9c6f14;box-shadow:inset 0 0 0 2px #ffffff"></i>Бумага</button></span><button class="tgl on" id="helpToggle" type="button">пояснения: вкл</button></span>
 </header>
 <div class="grid">
   <div class="intro">
@@ -135,10 +145,10 @@ abbr{text-decoration:underline dotted;cursor:help}
     </div>
     <div class="body"><canvas id="main" height="380"></canvas></div>
     <div class="help">
-      <p><b>Линия регрессии</b> (оранжевая сплошная) — прямая, которая лучше всего описывает движение цены за выбранное окно (30, 90 или 180 дней). Считается методом наименьших квадратов по логарифму цены, поэтому одинаковый процент роста выглядит одинаковым наклоном при любой цене. Это «средний курс» тренда: цена колеблется вокруг неё.</p>
-      <p><b>Канал ±2σ</b> (оранжевый пунктир) — коридор, в котором цена находилась примерно 95% времени внутри окна. У верхней границы монета обычно «перегрета» относительно своего тренда, у нижней — «перепродана». Выход за канал означает либо разворот, либо смену режима.</p>
-      <p><b>Интервал предсказания</b> (оранжевая заливка справа от пунктирной вертикали) — куда попадёт цена через 1…30 дней с вероятностью 95%, <em>если тренд окна продолжится как был</em>. Он расширяется с горизонтом: чем дальше, тем меньше уверенности. Формула честная, но допущение «тренд продолжится» — самое слабое место любого прогноза.</p>
-      <p><b>Конус дрейф/волатильность</b> (синий) — второй, независимый прогноз: берём средний дневной ход монеты и её волатильность за 90 дней и строим «воронку» возможных цен. Когда синий и оранжевый прогнозы смотрят в разные стороны, значит тренд последних недель не похож на среднее поведение монеты, и экстраполировать его опасно.</p>
+      <p><b>Линия регрессии</b> (сплошная линия цвета акцента) — прямая, которая лучше всего описывает движение цены за выбранное окно (30, 90 или 180 дней). Считается методом наименьших квадратов по логарифму цены, поэтому одинаковый процент роста выглядит одинаковым наклоном при любой цене. Это «средний курс» тренда: цена колеблется вокруг неё.</p>
+      <p><b>Канал ±2σ</b> (пунктир того же цвета) — коридор, в котором цена находилась примерно 95% времени внутри окна. У верхней границы монета обычно «перегрета» относительно своего тренда, у нижней — «перепродана». Выход за канал означает либо разворот, либо смену режима.</p>
+      <p><b>Интервал предсказания</b> (полупрозрачная заливка справа от пунктирной вертикали) — куда попадёт цена через 1…30 дней с вероятностью 95%, <em>если тренд окна продолжится как был</em>. Он расширяется с горизонтом: чем дальше, тем меньше уверенности. Формула честная, но допущение «тренд продолжится» — самое слабое место любого прогноза.</p>
+      <p><b>Конус дрейф/волатильность</b> (синий) — второй, независимый прогноз: берём средний дневной ход монеты и её волатильность за 90 дней и строим «воронку» возможных цен. Когда два прогноза смотрят в разные стороны, значит тренд последних недель не похож на среднее поведение монеты, и экстраполировать его опасно.</p>
       <dl>
         <dt>тренд (год.)</dt><dd>наклон линии регрессии в годовых процентах; под ним — тот же наклон в процентах за день. Огромные значения на окне 30д нормальны: короткий импульс, растянутый на год, всегда выглядит абсурдно.</dd>
         <dt>R²</dt><dd>насколько хорошо прямая описывает цену, от 0 до 1. Выше 0.7 — движение действительно похоже на тренд; ниже 0.4 — цена скорее болтается, и наклон почти ничего не значит.</dd>
@@ -154,8 +164,8 @@ abbr{text-decoration:underline dotted;cursor:help}
     <h3>КОРРЕЛЯЦИИ <span class="sp"></span><span class="btns" id="corrBtns"></span></h3>
     <div class="body"><canvas id="heat" height="330"></canvas></div>
     <div class="help">
-      <p><b>Тепловая карта</b> — корреляция каждой пары монет за 30, 90 или 365 дней. Ярко-оранжевая клетка — монеты ходят как одна (ρ близко к 1), тёмная — независимы, синяя — в противофазе. Наведи курсор на клетку, чтобы увидеть точное число; клик по строке выбирает монету.</p>
-      <p><em>Зачем:</em> если у тебя в портфеле пять монет и все клетки между ними оранжевые, это не пять активов, а один — на падении они упадут вместе. Диверсификация работает только между тёмными клетками. Короткое окно (30д) показывает, что происходит сейчас, длинное (365д) — привычное поведение.</p>
+      <p><b>Тепловая карта</b> — корреляция каждой пары монет за 30, 90 или 365 дней. Яркая клетка цвета акцента — монеты ходят как одна (ρ близко к 1), тёмная — независимы, клетка второго цвета — в противофазе. Наведи курсор на клетку, чтобы увидеть точное число; клик по строке выбирает монету.</p>
+      <p><em>Зачем:</em> если у тебя в портфеле пять монет и все клетки между ними яркие, это не пять активов, а один — на падении они упадут вместе. Диверсификация работает только между тёмными клетками. Короткое окно (30д) показывает, что происходит сейчас, длинное (365д) — привычное поведение.</p>
     </div>
     <h3>СВЯЗИ <span id="lTitle" class="dim" style="font-weight:400"></span></h3>
     <div class="body links" id="links"></div>
@@ -165,12 +175,19 @@ abbr{text-decoration:underline dotted;cursor:help}
     </div>
   </div>
 
-  <div class="panel wide">
-    <h3>СКОЛЬЗЯЩАЯ КОРРЕЛЯЦИЯ С BTC (30Д) <span class="sp"></span><span class="dim" style="font-weight:400;letter-spacing:0">оранжевая — выбранная монета, серая — средняя по рынку</span></h3>
+  <div class="panel wide" id="tvPanel">
+    <h3>TRADINGVIEW <span id="tvTitle" class="dim" style="font-weight:400;letter-spacing:0"></span><span class="sp"></span><a id="tvLink" class="dim" href="#" target="_blank" rel="noopener" style="font-weight:400;letter-spacing:0;color:var(--muted)">открыть на tradingview.com ↗</a></h3>
+    <div class="tv"><iframe id="tv" title="TradingView" allowfullscreen></iframe></div>
+    <div class="help">
+      <p><b>Живой график TradingView</b> для выбранной монеты: свечи по 4 часа с Binance, все инструменты рисования и индикаторы TradingView доступны прямо здесь. Верхние панели считают статистику по дневным ценам, а тут можно посмотреть, что происходит внутри дня. Цветовая схема графика следует за выбранной схемой сайта.</p>
+    </div>
+  </div>
+  <div class="panel full">
+    <h3>СКОЛЬЗЯЩАЯ КОРРЕЛЯЦИЯ С BTC (30Д) <span class="sp"></span><span class="dim" style="font-weight:400;letter-spacing:0">цветная — выбранная монета, серая — средняя по рынку</span></h3>
     <div class="body"><canvas id="roll" height="150"></canvas></div>
     <div class="help">
       <p><b>Скользящая корреляция</b> показывает, как связь с биткоином менялась во времени: каждая точка — корреляция за предыдущие 30 дней. Серая линия — средняя корреляция всех монет между собой, то есть «температура» рынка.</p>
-      <p><em>Как читать:</em> когда серая линия уходит выше 0.7, рынок ходит единым блоком и обычно это происходит на панике — падает всё разом. Когда она опускается к 0.3–0.4, монеты расходятся, начинаются свои истории и есть смысл выбирать отдельные активы. Оранжевая линия ниже серой — выбранная монета сейчас живёт независимее рынка.</p>
+      <p><em>Как читать:</em> когда серая линия уходит выше 0.7, рынок ходит единым блоком и обычно это происходит на панике — падает всё разом. Когда она опускается к 0.3–0.4, монеты расходятся, начинаются свои истории и есть смысл выбирать отдельные активы. Цветная линия ниже серой — выбранная монета сейчас живёт независимее рынка.</p>
     </div>
   </div>
   <div class="panel">
@@ -194,10 +211,10 @@ const $=s=>document.querySelector(s);
 let C={};
 function readTheme(){const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
   C={bg:v('--bg'),panel:v('--panel'),grid:v('--grid'),border:v('--border'),text:v('--muted'),amber:v('--accent'),amberRgb:v('--accent-rgb'),blue:v('--info'),blueRgb:v('--info-rgb'),green:v('--up'),red:v('--down'),white:v('--text'),muted:v('--muted')};}
-const SKINS={vault:'Сейф',brass:'Латунь',paper:'Бумага'};
-function applySkin(name){if(!SKINS[name])name='vault';document.documentElement.dataset.skin=name;try{localStorage.setItem('grosh_skin',name);}catch(e){}
+const SKINS={graphite:'Графит',vault:'Сейф',paper:'Бумага'};
+function applySkin(name){if(!SKINS[name])name='graphite';document.documentElement.dataset.skin=name;try{localStorage.setItem('grosh_skin',name);}catch(e){}
   document.querySelectorAll('#skins button').forEach(b=>b.classList.toggle('on',b.dataset.skin===name));if(D)render();}
-(function(){let sk=null;try{sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'vault';})();
+(function(){let sk=null;try{sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'graphite';})();
 let D, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
 const fmtP=v=>v>=1000?v.toLocaleString('en',{maximumFractionDigits:0}):v>=1?v.toFixed(v>=100?1:v>=10?2:3):v.toPrecision(3);
 const pct=(v,d=1)=>v==null?'—':Math.abs(v)>999?(v>0?'>+999%':'<-999%'):(v>0?'+':'')+v.toFixed(d)+'%';
@@ -225,12 +242,29 @@ function init(){
   applySkin(document.documentElement.dataset.skin);
   window.addEventListener('resize',()=>render());
   applyHelp();
+  bootAnimation();
 }
 function render(){
   readTheme();
   $('#winBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===win+'д'));
   $('#corrBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===corrWin+'д'));
-  watchlist();drawMain();heat();links();roll();lag();
+  watchlist();drawMain();heat();links();roll();lag();tv();
+}
+let tvKey='';
+function tv(){
+  const dark=getComputedStyle(document.documentElement).colorScheme!=='light';
+  const key=sel+(dark?'d':'l');if(key===tvKey)return;tvKey=key;
+  const sym=`BINANCE:${sel}USDT`;
+  $('#tv').src=`https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(sym)}&interval=240&theme=${dark?'dark':'light'}&style=1&locale=ru&timezone=Europe%2FKyiv&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=1&toolbarbg=${dark?'12161d':'ffffff'}`;
+  $('#tvTitle').textContent=`${sym} · 4h`;$('#tvLink').href=`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`;
+}
+function bootAnimation(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  document.body.classList.add('boot');
+  document.querySelectorAll('.grid > *').forEach((el,i)=>el.style.setProperty('--i',i));
+  const t0=performance.now(),dur=1300;
+  const step=now=>{const p=Math.min(1,(now-t0)/dur);const e=1-Math.pow(1-p,3);drawMain(e);if(p<1)requestAnimationFrame(step);};
+  setTimeout(()=>requestAnimationFrame(step),250);
 }
 function rowData(s){const st=D.stats[s],r=D.regression[s]['90'];return {s,...st,z:r.z,slope:r.slope_ann_pct};}
 function watchlist(){
@@ -241,8 +275,10 @@ function watchlist(){
    <td class="${Math.abs(r.z)>1.5?(r.z>0?'neg':'pos'):''}">${r.z.toFixed(2)}</td><td class="${cls(r.slope)}">${pct(r.slope,0)}</td></tr>`).join('');
   $('#wl tbody').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{sel=tr.dataset.s;render();});
 }
+function clipTo(arr,cut){return cut==null?arr:arr.map((v,i)=>i<=cut?v:null);}
 function lineChart(cv,cfg){
-  const [g,W,H]=setup(cv);const pl={l:cfg.padL||58,r:12,t:10,b:22};const iw=W-pl.l-pl.r,ih=H-pl.t-pl.b;
+  const [g,W,H]=setup(cv);
+  if(cfg.prog!=null&&cfg.prog<1){const cut=Math.floor((cfg.n-1)*cfg.prog);cfg={...cfg,series:cfg.series.map(sr=>({...sr,data:clipTo(sr.data,cut)})),bands:(cfg.bands||[]).map(b=>({...b,lo:clipTo(b.lo,cut),hi:clipTo(b.hi,cut)}))};}const pl={l:cfg.padL||58,r:12,t:10,b:22};const iw=W-pl.l-pl.r,ih=H-pl.t-pl.b;
   const n=cfg.n;const tf=cfg.log?Math.log:v=>v,ti=cfg.log?Math.exp:v=>v;
   let lo=Infinity,hi=-Infinity;for(const s of [...cfg.series,...(cfg.bands||[]).flatMap(b=>[{data:b.lo},{data:b.hi}])])for(const v of s.data)if(v!=null&&isFinite(v)){lo=Math.min(lo,tf(v));hi=Math.max(hi,tf(v));}
   if(cfg.yMin!=null){lo=tf(cfg.yMin);hi=tf(cfg.yMax);}else{const p=(hi-lo)*.05;lo-=p;hi+=p;}
@@ -259,14 +295,14 @@ function lineChart(cv,cfg){
   for(const s of cfg.series){g.strokeStyle=s.color;g.lineWidth=s.width||1.2;g.setLineDash(s.dash||[]);g.beginPath();let st=false;
     for(let i=0;i<n;i++){const v=s.data[i];if(v==null||!isFinite(v)){st=false;continue;}if(!st){g.moveTo(X(i),Y(v));st=true;}else g.lineTo(X(i),Y(v));}g.stroke();g.setLineDash([]);}
 }
-function drawMain(){
+function drawMain(prog){
   const s=sel,r=D.regression[s][win],c=D.cone[s],st=D.stats[s];const hz=D.horizon;
   const P=D.prices[s].slice(-win);const n=win+hz;const pad=a=>Array(win).fill(null).concat(a);
   const series=[{data:P.concat(Array(hz).fill(null)),color:C.white,width:1.5}];const bands=[];
   if(layers.reg){series.push({data:r.fit.concat(r.proj_mid),color:C.amber,width:1.2},{data:r.lo.concat(Array(hz).fill(null)),color:C.amber,dash:[4,3],width:.8},{data:r.hi.concat(Array(hz).fill(null)),color:C.amber,dash:[4,3],width:.8});
     bands.push({lo:pad(r.proj_lo),hi:pad(r.proj_hi),color:`rgba(${C.amberRgb},.18)`});}
   if(layers.cone){series.push({data:pad(c.mid),color:C.blue,dash:[2,3]},{data:pad(c.lo),color:C.blue,width:.8},{data:pad(c.hi),color:C.blue,width:.8});}
-  lineChart($('#main'),{n,series,bands,log:layers.log,labels:D.dates.slice(-win).concat(D.proj_dates),split:win-1});
+  lineChart($('#main'),{n,series,bands,log:layers.log,labels:D.dates.slice(-win).concat(D.proj_dates),split:win-1,prog});
   $('#mTitle').textContent=`${s}/USDT — ${fmtP(st.price)}   регрессионный канал ${win}д + проекция ${hz}д`;
   const zc=Math.abs(r.z)>1.5?(r.z>0?'neg':'pos'):'';
   $('#mStats').innerHTML=[
