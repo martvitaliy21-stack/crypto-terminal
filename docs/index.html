@@ -77,6 +77,15 @@ tr:hover td{background:var(--panel2)} tr.sel td{background:var(--panel2);box-sha
 body.nohelp .help,body.nohelp .intro{display:none}
 .intro{grid-column:1/-1;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:4px;color:var(--help-text);font:13px/1.65 var(--sans)}
 .intro b{color:var(--accent)} .intro .warn{color:var(--text);font-weight:500}
+.badge{padding:2px 8px;border-radius:3px;font-size:10px;border:1px solid var(--border);color:var(--muted);letter-spacing:0;font-weight:500}
+.badge[data-level=ok]{color:var(--up);border-color:var(--up)} .badge[data-level=warn]{color:var(--accent);border-color:var(--accent)} .badge[data-level=bad]{color:var(--down);border-color:var(--down)}
+.stats.bot{grid-template-columns:repeat(8,1fr)}
+.bot-grid{display:grid;grid-template-columns:1fr 440px;gap:10px;padding:8px 10px}
+.bot-side h4{margin:4px 0 4px;font-size:10px;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.bot-side table td,.bot-side table th{cursor:default;padding:2px 4px}
+.bot-log{padding:4px 10px 8px;font-size:11px;color:var(--help-text);max-height:150px;overflow:auto;border-top:1px solid var(--border)}
+.bot-log div{padding:1px 0;white-space:nowrap} .bot-log span{color:var(--muted);margin-right:8px}
+.h3links{display:flex;gap:10px;font-weight:400;letter-spacing:0} .h3links a{color:var(--muted);text-decoration:none} .h3links a:hover{color:var(--accent)}
 .main{grid-row:span 2}
 .wide{grid-column:1/3}
 .full{grid-column:1/-1}
@@ -93,8 +102,8 @@ abbr{text-decoration:underline dotted;cursor:help}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes brand{0%{opacity:0;letter-spacing:.3em}60%{opacity:1}100%{letter-spacing:.02em}}
-@media(max-width:1200px){.grid{grid-template-columns:1fr 1fr}.main{grid-column:1/3;grid-row:auto}.wide,.full{grid-column:1/3}}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.main,.wide,.full{grid-column:auto}.tv iframe{height:380px}.stats{grid-template-columns:repeat(3,1fr)}header{gap:10px}}
+@media(max-width:1200px){.grid{grid-template-columns:1fr 1fr}.main{grid-column:1/3;grid-row:auto}.wide,.full{grid-column:1/3}.stats.bot{grid-template-columns:repeat(4,1fr)}.bot-grid{grid-template-columns:1fr}}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.main,.wide,.full{grid-column:auto}.tv iframe{height:380px}.stats{grid-template-columns:repeat(3,1fr)}.stats.bot{grid-template-columns:repeat(2,1fr)}header{gap:10px}}
 </style>
 </head>
 <body>
@@ -114,6 +123,31 @@ abbr{text-decoration:underline dotted;cursor:help}
     <span class="warn">Важно: прогнозные линии — это продолжение прошлого тренда по формуле, а не предсказание будущего. Это инструмент для понимания, а не сигнал купить или продать.</span>
   </div>
 
+  <div class="panel full" id="botPanel">
+    <h3>ПЕЙПЕР-БОТ · СИМУЛЯЦИЯ НА 500 $ <span class="badge" id="botStatus">загрузка…</span><span class="sp"></span>
+      <span class="h3links"><a href="https://github.com/martvitaliy21-stack/crypto-terminal/actions" target="_blank" rel="noopener">журнал запусков ↗</a><a href="bot/state.json" target="_blank" rel="noopener">файл состояния ↗</a></span></h3>
+    <div class="stats bot" id="botStats"></div>
+    <div class="bot-grid">
+      <div>
+        <div class="legend" style="padding:0 0 4px"><span><i style="background:var(--accent)"></i>капитал бота</span><span><i style="background:var(--border);height:3px"></i>500 $ в BTC без бота</span><span class="dim">пунктир — начало работы в реальном времени</span></div>
+        <canvas id="botEq" height="230"></canvas>
+      </div>
+      <div class="bot-side">
+        <h4>ОТКРЫТЫЕ ПОЗИЦИИ</h4>
+        <table id="botPos"><thead><tr><th>монета</th><th>вход</th><th>сейчас</th><th>PnL</th><th>стоп</th><th>тейк</th><th>держит</th></tr></thead><tbody></tbody></table>
+        <h4 style="margin-top:10px">ПОСЛЕДНИЕ СДЕЛКИ</h4>
+        <table id="botTrades"><thead><tr><th>закрыта</th><th>монета</th><th>вход → выход</th><th>PnL</th><th>%</th><th>почему</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="bot-log" id="botLog"></div>
+    <div class="help">
+      <p><b>Что это.</b> Бот торгует <em>виртуальными</em> 500 $: деньги ненастоящие, ордера на биржу не отправляются, но цены, комиссия Binance 0.1% и проскальзывание 0.05% — реальные. Задача симуляции — показать, как алгоритм принимает решения и какую статистику набирает, прежде чем кто-то доверит ему настоящий депозит.</p>
+      <p><b>Как решает.</b> Смотрит на 4-часовые свечи семи монет (BTC, ETH, SOL, BNB, XRP, LINK, AVAX). Покупает, когда цена выше EMA200, EMA50 выше EMA200 (то есть тренд вверх), RSI откатился к 50 и развернулся вверх, объём выше среднего и свеча закрылась ростом. В момент покупки сразу ставит стоп на 3 ATR ниже входа и тейк вдвое дальше стопа. Продаёт только по стопу или тейку — никаких «подумал и вышел».</p>
+      <p><b>Правила риска, которые он не может нарушить.</b> Риск 1% капитала на сделку (при 500 $ это 5 $), не больше трёх позиций одновременно, не больше трети капитала в одну монету, при убытке 3% за день — пауза на сутки.</p>
+      <p><b>Честность графика.</b> Первые 30 дней кривой рассчитаны по истории, чтобы было что показать в первый же день; вертикальный пунктир «live» отмечает момент, с которого бот работает в реальном времени. Серая линия — что было бы, если просто купить BTC на те же 500 $ и ничего не делать: это главный конкурент любого бота.</p>
+      <p><b>Почему без перебоев.</b> Бот запускается на серверах GitHub каждые 30 минут и не зависит ни от чьего компьютера. Если запуск задержался или пропал, следующий обрабатывает все пропущенные свечи по порядку — ни одна сделка не теряется. Состояние записывается атомарно, ошибка по одной монете не останавливает остальные. Значок в заголовке показывает, когда бот отчитался последний раз: зелёный — всё в порядке, жёлтый — задержка больше 75 минут, красный — больше трёх часов без связи. Проверить можно самому: «журнал запусков» ведёт на историю запусков, «файл состояния» — на сырые данные, которые рисует эта панель.</p>
+    </div>
+  </div>
   <div class="panel">
     <h3>WATCHLIST <span class="sp"></span><span class="dim" style="font-weight:400;letter-spacing:0">клик по заголовку — сортировка</span></h3>
     <div class="body" style="padding:0;overflow:auto">
@@ -215,7 +249,7 @@ const SKINS={graphite:'Графит',vault:'Сейф',paper:'Бумага'};
 function applySkin(name){if(!SKINS[name])name='graphite';document.documentElement.dataset.skin=name;try{localStorage.setItem('grosh_skin',name);}catch(e){}
   document.querySelectorAll('#skins button').forEach(b=>b.classList.toggle('on',b.dataset.skin===name));if(D)render();}
 (function(){let sk=null;try{sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'graphite';})();
-let D, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
+let D, B=null, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
 const fmtP=v=>v>=1000?v.toLocaleString('en',{maximumFractionDigits:0}):v>=1?v.toFixed(v>=100?1:v>=10?2:3):v.toPrecision(3);
 const pct=(v,d=1)=>v==null?'—':Math.abs(v)>999?(v>0?'>+999%':'<-999%'):(v>0?'+':'')+v.toFixed(d)+'%';
 const cls=v=>v>0?'pos':v<0?'neg':'';
@@ -223,6 +257,7 @@ const dpr=()=>window.devicePixelRatio||1;
 function setup(cv){const h=+(cv.dataset.h||(cv.dataset.h=cv.getAttribute('height')));const w=cv.parentElement.clientWidth-20;cv.style.height=h+'px';cv.style.width=w+'px';cv.width=w*dpr();cv.height=h*dpr();const g=cv.getContext('2d');g.setTransform(dpr(),0,0,dpr(),0,0);g.clearRect(0,0,w,h);return [g,w,h];}
 
 /*DATA*/fetch('data.json').then(r=>r.json()).then(d=>{D=d;init();});
+/*BOT*/fetch('bot/state.json').then(r=>r.json()).then(b=>{B=b;bot();}).catch(()=>{const e=$('#botStatus');e.textContent='нет данных';e.dataset.level='bad';});
 
 function init(){
   $('#hBtc').textContent=fmtP(D.stats.BTC.price);$('#hEth').textContent=fmtP(D.stats.ETH.price);$('#hGen').textContent=D.generated;
@@ -248,7 +283,40 @@ function render(){
   readTheme();
   $('#winBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===win+'д'));
   $('#corrBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===corrWin+'д'));
-  watchlist();drawMain();heat();links();roll();lag();tv();
+  watchlist();drawMain();heat();links();roll();lag();tv();bot();
+}
+const fmtAgo=ms=>{const m=Math.round((Date.now()-ms)/60000);return m<1?'только что':m<60?`${m} мин назад`:`${Math.floor(m/60)} ч ${m%60} мин назад`;};
+const fmtD=ms=>new Date(ms).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const usd=v=>(v<0?'−':'')+Math.abs(v).toFixed(2)+' $';
+function bot(){
+  if(!B||!B.equity.length)return;readTheme();
+  const eq=B.equity,last=eq.at(-1),cur=last[1],start=B.start_equity,pnl=cur-start,pnlp=pnl/start*100,bh=last[2];
+  let peak=-Infinity,dd=0;for(const e of eq){peak=Math.max(peak,e[1]);dd=Math.min(dd,e[1]/peak-1);}
+  const tr=B.trades,wins=tr.filter(t=>t.pnl>0).length,pos=Object.entries(B.positions),marks=B.marks||{};
+  const unreal=pos.reduce((a,[k,p])=>a+p.qty*(marks[k]||p.entry)-p.cost,0);
+  const mins=(Date.now()-B.status.last_run)/60000,st=$('#botStatus');
+  st.textContent=(mins<75?'работает':mins<180?'задержка':'нет обновлений')+' · '+fmtAgo(B.status.last_run);st.dataset.level=mins<75?'ok':mins<180?'warn':'bad';
+  st.title=B.status.last_error?'последняя ошибка: '+B.status.last_error:`запусков: ${B.status.runs}, свечей обработано в последний раз: ${B.status.events??0}`;
+  const tile=(l,v,s2,k='')=>`<div class="stat"><div class="l">${l}</div><div class="v ${k}">${v}</div><div class="s">${s2}</div></div>`;
+  $('#botStats').innerHTML=[
+    tile('капитал',cur.toFixed(2)+' $',`старт ${start.toFixed(0)} $ · ${new Date(B.started).toLocaleDateString('ru-RU')}`),
+    tile('результат',(pnl>=0?'+':'')+usd(pnl),pct(pnlp,2),cls(pnl)),
+    tile('BTC без бота',bh?bh.toFixed(2)+' $':'—',bh?pct((bh/start-1)*100,2)+' buy & hold':'',bh?cls(bh-start):''),
+    tile('открыто',pos.length+' из '+B.config.max_positions,'нереализовано '+(unreal>=0?'+':'')+usd(unreal),cls(unreal)),
+    tile('сделок',tr.length,tr.length?`выигрышных ${Math.round(wins/tr.length*100)}%`:'ждёт сигнала'),
+    tile('макс. просадка',pct(dd*100,1),'от пика капитала',dd<-0.1?'neg':''),
+    tile('свободно',B.cash.toFixed(2)+' $','в USDT, не в позициях'),
+    tile('запусков',B.status.runs,B.status.errors?`ошибок ${B.status.errors}`:'ошибок нет',B.status.last_error?'neg':''),
+  ].join('');
+  const labels=eq.map(e=>new Date(e[0]).toISOString().slice(0,10));
+  const liveIdx=eq.findIndex(e=>e[0]>=B.live_from);
+  lineChart($('#botEq'),{n:eq.length,series:[{data:eq.map(e=>e[2]),color:C.border,width:1.6},{data:eq.map(e=>e[1]),color:C.amber,width:1.6}],labels,split:liveIdx>0?liveIdx:null,splitLabel:'live →',padL:48,fmtY:v=>v.toFixed(0)+' $'});
+  $('#botPos tbody').innerHTML=pos.length?pos.map(([k,p])=>{const m=marks[k]||p.entry,r=(m/p.entry-1)*100,d=(Date.now()-p.entry_ts)/86400000;
+    return `<tr><td>${k}</td><td>${fmtP(p.entry)}</td><td>${fmtP(m)}</td><td class="${cls(r)}">${pct(r,2)}</td><td>${fmtP(p.stop)}</td><td>${fmtP(p.take)}</td><td>${d<1?Math.round(d*24)+' ч':d.toFixed(1)+' д'}</td></tr>`;}).join('')
+    :'<tr><td colspan="7" class="dim">позиций нет — бот ждёт сигнала</td></tr>';
+  $('#botTrades tbody').innerHTML=tr.slice(-8).reverse().map(t=>`<tr><td>${fmtD(t.exit_ts)}</td><td>${t.symbol}</td><td>${fmtP(t.entry)} → ${fmtP(t.exit)}</td><td class="${cls(t.pnl)}">${(t.pnl>=0?'+':'')+usd(t.pnl)}</td><td class="${cls(t.pnl)}">${pct(t.pnl_pct*100,2)}</td><td class="dim">${t.reason==='take'?'тейк':t.reason==='stop'?'стоп':t.reason}</td></tr>`).join('')
+    ||'<tr><td colspan="6" class="dim">сделок ещё не было</td></tr>';
+  $('#botLog').innerHTML=B.log.slice(-14).reverse().map(([t,m])=>`<div><span>${fmtD(t)}</span>${m}</div>`).join('');
 }
 let tvKey='';
 function tv(){
@@ -287,7 +355,7 @@ function lineChart(cv,cfg){
   for(let k=0;k<=4;k++){const yv=ti(lo+(hi-lo)*k/4),y=Y(yv);g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();g.fillText(cfg.fmtY?cfg.fmtY(yv):fmtP(yv),pl.l-6,y+3);}
   g.textAlign='center';const step=Math.max(1,Math.round(n/6));
   for(let i=0;i<n;i+=step){g.fillText(cfg.labels[i]?.slice(cfg.labelSlice??5)??'',X(i),H-6);}
-  if(cfg.split!=null){const x=X(cfg.split);g.setLineDash([3,3]);g.strokeStyle=C.border;g.beginPath();g.moveTo(x,pl.t);g.lineTo(x,H-pl.b);g.stroke();g.setLineDash([]);g.fillStyle=C.text;g.textAlign='left';g.fillText('прогноз →',x+4,pl.t+10);}
+  if(cfg.split!=null){const x=X(cfg.split);g.setLineDash([3,3]);g.strokeStyle=C.border;g.beginPath();g.moveTo(x,pl.t);g.lineTo(x,H-pl.b);g.stroke();g.setLineDash([]);g.fillStyle=C.text;g.textAlign='left';g.fillText(cfg.splitLabel??'прогноз →',x+4,pl.t+10);}
   if(cfg.zero){const y=Y(0);g.strokeStyle=C.border;g.beginPath();g.moveTo(pl.l,y);g.lineTo(W-pl.r,y);g.stroke();}
   for(const b of cfg.bands||[]){g.fillStyle=b.color;g.beginPath();let st=false;
     for(let i=0;i<n;i++){const v=b.hi[i];if(v==null)continue;if(!st){g.moveTo(X(i),Y(v));st=true;}else g.lineTo(X(i),Y(v));}

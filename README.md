@@ -6,7 +6,9 @@
 
 - `analyze.py` считает всё и пишет `docs/data.json` (Binance, запасной источник CoinGecko).
 - `docs/index.html` — сайт, публикуется через GitHub Pages из папки `/docs`.
-- `.github/workflows/update.yml` пересчитывает данные каждый час.
+- `bot_sim.py` — паперный бот на виртуальные 500 $ (та же стратегия, что у основного бота), состояние в `docs/bot/state.json`.
+- `.github/workflows/update.yml` каждые 30 минут запускает бота и пересчитывает данные; push с повтором при гонке.
+- `build_artifact.py out.html` — одностраничная версия с инлайн-данными.
 
 Локально: `pip install -r requirements.txt && python analyze.py && python -m http.server 8766 --directory docs`
 
