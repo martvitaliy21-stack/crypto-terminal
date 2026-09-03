@@ -145,7 +145,7 @@ abbr{text-decoration:underline dotted;cursor:help}
       <p><b>Как решает.</b> Смотрит на 4-часовые свечи семи монет (BTC, ETH, SOL, BNB, XRP, LINK, AVAX). Покупает, когда цена выше EMA200, EMA50 выше EMA200 (то есть тренд вверх), RSI откатился к 50 и развернулся вверх, объём выше среднего и свеча закрылась ростом. В момент покупки сразу ставит стоп на 3 ATR ниже входа и тейк вдвое дальше стопа. Продаёт только по стопу или тейку — никаких «подумал и вышел».</p>
       <p><b>Правила риска, которые он не может нарушить.</b> Риск 1% капитала на сделку (при 500 $ это 5 $), до семи позиций одновременно — по одной на монету, не больше 14% капитала в одну монету, при убытке 3% за день — пауза на сутки.</p>
       <p><b>Честность графика.</b> Бот стартовал 3 сентября 2026 года с 500 $ и без всякой предыстории: всё, что видно на графике и в списке сделок, произошло в реальном времени после старта, задним числом ничего не дорисовано. Серая линия — что было бы, если в момент старта просто купить BTC на те же 500 $ и ничего не делать: это главный конкурент любого бота.</p>
-      <p><b>Почему сделок мало.</b> Это медленная стратегия: свечи по 4 часа, вход только на откате внутри тренда. По бэктесту за два года выходит около одной сделки в неделю на все семь монет, а позиция может жить и две недели. В первые дни после старта список сделок будет пустым — бот ждёт сигнала, это нормально. Пометка «● стоп» или «● тейк» у монеты означает, что живая цена уже пересекла уровень и позиция закроется при следующем запуске.</p>
+      <p><b>Почему сделок мало.</b> Это медленная стратегия: свечи по 4 часа, вход только на откате внутри тренда. По бэктесту за два года выходит около одной сделки в неделю на все семь монет, а позиция может жить и две недели. Решения принимаются только в момент закрытия 4-часовой свечи: в 03:00, 07:00, 11:00, 15:00, 19:00 и 23:00 по Киеву; между этими моментами бот ничего не покупает и не продаёт, а только следит за стопами и тейками. В первые дни после старта список сделок будет пустым — бот ждёт сигнала, это нормально. Пометка «● стоп» или «● тейк» у монеты означает, что живая цена уже пересекла уровень и позиция закроется при следующем запуске.</p>
       <p><b>Почему без перебоев.</b> Бот запускается на серверах GitHub каждые 30 минут; расписание GitHub иногда задерживает запуски на часы, поэтому дополнительно запуск инициируется извне каждые полчаса — два независимых триггера. Если запуск всё же задержался, следующий обрабатывает все пропущенные свечи по порядку — ни одна сделка не теряется, а цены открытых позиций и капитал в этой панели подтягиваются с Binance прямо в браузере каждую минуту, так что текущий результат актуален и между запусками. Состояние записывается атомарно, ошибка по одной монете не останавливает остальные. Значок в заголовке показывает, когда бот отчитался последний раз: зелёный — меньше двух часов назад, жёлтый — GitHub задерживает запуск, красный — больше шести часов без запусков. Проверить можно самому: «журнал запусков» ведёт на историю запусков, «файл состояния» — на сырые данные, которые рисует эта панель.</p>
     </div>
   </div>
@@ -262,7 +262,7 @@ function setup(cv){const h=+(cv.dataset.h||(cv.dataset.h=cv.getAttribute('height
 
 function init(){
   $('#hBtc').textContent=fmtP(D.stats.BTC.price);$('#hEth').textContent=fmtP(D.stats.ETH.price);$('#hGen').textContent=D.generated;
-  const a=D.avg_corr.values.at(-1);$('#hAvg').textContent=a.toFixed(2);
+  const a=D.avg_corr.values[D.avg_corr.values.length-1];$('#hAvg').textContent=a.toFixed(2);
   const reg=$('#hRegime');
   reg.textContent=a>0.7?'РЕЖИМ: ЕДИНЫЙ БЛОК — всё ходит за BTC':a>0.45?'РЕЖИМ: УМЕРЕННАЯ СВЯЗЬ':'РЕЖИМ: РАЗНОНАПРАВЛЕННЫЙ — альты живут своей жизнью';
   reg.title='Режим рынка по средней корреляции за 30 дней: выше 0.7 — всё падает и растёт вместе; ниже 0.45 — монеты расходятся';
@@ -291,13 +291,15 @@ const fmtD=ms=>new Date(ms).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit
 const usd=v=>(v<0?'−':'')+Math.abs(v).toFixed(2)+' $';
 function bot(){
   if(!B||!B.equity.length)return;readTheme();
-  const eq=B.equity,last=eq.at(-1),start=B.start_equity,bh=last[2];
+  const eq=B.equity,last=eq[eq.length-1],start=B.start_equity,bh=last[2];
   let peak=-Infinity,dd=0;for(const e of eq){peak=Math.max(peak,e[1]);dd=Math.min(dd,e[1]/peak-1);}
   const tr=B.trades,wins=tr.filter(t=>t.pnl>0).length,pos=Object.entries(B.positions),marks={...(B.marks||{}),...(B.live||{})};
   const unreal=pos.reduce((a,[k,p])=>a+p.qty*(marks[k]||p.entry)-p.cost,0);
   const liveEq=B.cash+pos.reduce((a,[k,p])=>a+p.qty*(marks[k]||p.entry),0);
   const mins=(Date.now()-B.status.last_run)/60000,st=$('#botStatus');
-  st.textContent=(mins<120?'работает':mins<360?'GitHub задерживает запуск':'нет запусков')+' · отчёт '+fmtAgo(B.status.last_run)+(B.live?' · цены live':'');st.dataset.level=mins<120?'ok':mins<360?'warn':'bad';
+  const nextBar=new Date(Math.ceil(Date.now()/14400000)*14400000).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  if(window.SNAPSHOT){st.textContent='снимок от '+fmtD(B.status.last_run)+' · живые данные на сайте';st.dataset.level='';}
+  else{st.textContent=(mins<120?'работает':mins<360?'GitHub задерживает запуск':'нет запусков')+' · отчёт '+fmtAgo(B.status.last_run)+(B.live?' · цены live':'')+' · следующее решение в '+nextBar;st.dataset.level=mins<120?'ok':mins<360?'warn':'bad';}
   st.title=B.status.last_error?'последняя ошибка: '+B.status.last_error:`запусков: ${B.status.runs}, свечей обработано в последний раз: ${B.status.events??0}`;
   const cur=liveEq,pnl=cur-start,pnlp=pnl/start*100;
   const tile=(l,v,s2,k='')=>`<div class="stat"><div class="l">${l}</div><div class="v ${k}">${v}</div><div class="s">${s2}</div></div>`;
@@ -306,7 +308,7 @@ function bot(){
     tile('результат',(pnl>=0?'+':'')+usd(pnl),pct(pnlp,2),cls(pnl)),
     tile('BTC без бота',bh?bh.toFixed(2)+' $':'—',bh?pct((bh/start-1)*100,2)+' buy & hold':'',bh?cls(bh-start):''),
     tile('открыто',pos.length+' из '+B.config.max_positions,'нереализовано '+(unreal>=0?'+':'')+usd(unreal)),
-    tile('сделок',tr.length,tr.length?`выигрышных ${Math.round(wins/tr.length*100)}%`:'ждёт сигнала'),
+    tile('сделок',tr.length,tr.length?`выигрышных ${Math.round(wins/tr.length*100)}%`:'ждёт сигнала на закрытии 4h-свечи'),
     tile('макс. просадка',pct(dd*100,1),'от пика капитала',dd<-0.1?'neg':''),
     tile('свободно',B.cash.toFixed(2)+' $','в USDT, не в позициях'),
     tile('запусков',B.status.runs,B.status.errors?`ошибок ${B.status.errors}`:'ошибок нет',B.status.last_error?'neg':''),
@@ -325,7 +327,7 @@ function bot(){
   $('#botLog').innerHTML=B.log.slice(-14).reverse().map(([t,m])=>`<div><span>${fmtD(t)}</span>${m}</div>`).join('');
 }
 async function livePrices(){
-  if(!B)return;const syms=Object.keys(B.positions);if(!syms.length)return;
+  if(!B||window.SNAPSHOT)return;const syms=Object.keys(B.positions);if(!syms.length)return;
   const q=encodeURIComponent(JSON.stringify(syms.map(x=>x+'USDT')));
   for(const host of ['https://data-api.binance.vision','https://api.binance.com']){
     try{const r=await fetch(`${host}/api/v3/ticker/price?symbols=${q}`,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();
@@ -392,8 +394,8 @@ function drawMain(prog){
    ['R²',r.r2.toFixed(2),r.r2>0.7?'тренд устойчивый':r.r2>0.4?'тренд слабый':'тренда нет, шум',''],
    ['z-score',r.z.toFixed(2)+'σ',r.z>1.5?'у верхней границы':r.z<-1.5?'у нижней границы':'внутри канала',zc],
    ['σ канала',r.sigma_pct.toFixed(1)+'%','отклонение от линии',''],
-   [`регрессия +${hz}д`,fmtP(r.proj_mid.at(-1)),`${fmtP(r.proj_lo.at(-1))} … ${fmtP(r.proj_hi.at(-1))}`,cls(r.proj_mid.at(-1)-st.price)],
-   [`конус +${hz}д`,fmtP(c.mid.at(-1)),`${fmtP(c.lo.at(-1))} … ${fmtP(c.hi.at(-1))}  vol ${c.vol_ann_pct.toFixed(0)}%`,cls(c.mid.at(-1)-st.price)],
+   [`регрессия +${hz}д`,fmtP(r.proj_mid[r.proj_mid.length-1]),`${fmtP(r.proj_lo[r.proj_lo.length-1])} … ${fmtP(r.proj_hi[r.proj_hi.length-1])}`,cls(r.proj_mid[r.proj_mid.length-1]-st.price)],
+   [`конус +${hz}д`,fmtP(c.mid[c.mid.length-1]),`${fmtP(c.lo[c.lo.length-1])} … ${fmtP(c.hi[c.hi.length-1])}  vol ${c.vol_ann_pct.toFixed(0)}%`,cls(c.mid[c.mid.length-1]-st.price)],
   ].map(([l,v,s2,k])=>`<div class="stat"><div class="l">${l}</div><div class="v ${k}">${v}</div><div class="s">${s2}</div></div>`).join('');
 }
 function heat(){
