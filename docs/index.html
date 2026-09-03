@@ -247,9 +247,9 @@ let C={};
 function readTheme(){const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
   C={bg:v('--bg'),panel:v('--panel'),grid:v('--grid'),border:v('--border'),text:v('--muted'),amber:v('--accent'),amberRgb:v('--accent-rgb'),blue:v('--info'),blueRgb:v('--info-rgb'),green:v('--up'),red:v('--down'),white:v('--text'),muted:v('--muted')};}
 const SKINS={graphite:'Графит',vault:'Сейф',paper:'Бумага'};
-function applySkin(name){if(!SKINS[name])name='graphite';document.documentElement.dataset.skin=name;try{localStorage.setItem('grosh_skin',name);}catch(e){}
+function applySkin(name,persist){if(!SKINS[name])name='graphite';document.documentElement.dataset.skin=name;if(persist){try{localStorage.setItem('grosh_skin_v2',name);}catch(e){}}
   document.querySelectorAll('#skins button').forEach(b=>b.classList.toggle('on',b.dataset.skin===name));if(D)render();}
-(function(){let sk=null;try{sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'graphite';})();
+(function(){let sk=null;try{localStorage.removeItem('grosh_skin');sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin_v2');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'graphite';})();
 let D, B=null, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
 const fmtP=v=>v>=1000?v.toLocaleString('en',{maximumFractionDigits:0}):v>=1?v.toFixed(v>=100?1:v>=10?2:3):v.toPrecision(3);
 const pct=(v,d=1)=>v==null?'—':Math.abs(v)>999?(v>0?'>+999%':'<-999%'):(v>0?'+':'')+v.toFixed(d)+'%';
@@ -274,7 +274,7 @@ function init(){
   const ht=$('#helpToggle');let help=true;try{help=localStorage.getItem('grosh_help')!=='0';}catch(e){}
   const applyHelp=()=>{document.body.classList.toggle('nohelp',!help);ht.classList.toggle('on',help);ht.textContent='пояснения: '+(help?'вкл':'выкл');render();};
   ht.onclick=()=>{help=!help;try{localStorage.setItem('grosh_help',help?'1':'0');}catch(e){}applyHelp();};
-  document.querySelectorAll('#skins button').forEach(b=>b.onclick=()=>applySkin(b.dataset.skin));
+  document.querySelectorAll('#skins button').forEach(b=>b.onclick=()=>applySkin(b.dataset.skin,true));
   applySkin(document.documentElement.dataset.skin);
   window.addEventListener('resize',()=>render());
   applyHelp();
