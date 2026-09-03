@@ -257,8 +257,8 @@ const cls=v=>v>0?'pos':v<0?'neg':'';
 const dpr=()=>window.devicePixelRatio||1;
 function setup(cv){const h=+(cv.dataset.h||(cv.dataset.h=cv.getAttribute('height')));const w=cv.parentElement.clientWidth-20;cv.style.height=h+'px';cv.style.width=w+'px';cv.width=w*dpr();cv.height=h*dpr();const g=cv.getContext('2d');g.setTransform(dpr(),0,0,dpr(),0,0);g.clearRect(0,0,w,h);return [g,w,h];}
 
-/*DATA*/fetch('data.json').then(r=>r.json()).then(d=>{D=d;init();});
-/*BOT*/fetch('bot/state.json').then(r=>r.json()).then(b=>{B=b;bot();livePrices();setInterval(livePrices,60000);}).catch(()=>{const e=$('#botStatus');e.textContent='нет данных';e.dataset.level='bad';});
+/*DATA*/fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{D=d;init();});
+/*BOT*/fetch('bot/state.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(b=>{B=b;bot();livePrices();setInterval(livePrices,60000);}).catch(()=>{const e=$('#botStatus');e.textContent='нет данных';e.dataset.level='bad';});
 
 function init(){
   $('#hBtc').textContent=fmtP(D.stats.BTC.price);$('#hEth').textContent=fmtP(D.stats.ETH.price);$('#hGen').textContent=D.generated;

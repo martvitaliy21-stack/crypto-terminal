@@ -7,9 +7,9 @@ def inline(name):
 head=re.search(r"<head>(.*?)</head>",src,re.S).group(1)
 body=re.search(r"<body>(.*?)</body>",src,re.S).group(1)
 head=re.sub(r'<meta charset="utf-8">\s*','',head); head=re.sub(r'<meta name="viewport"[^>]*>\s*','',head)
-body=body.replace("/*DATA*/fetch('data.json').then(r=>r.json()).then(d=>{D=d;init();});","D=JSON.parse(document.getElementById('data').textContent);init();")
+body=re.sub(r"/\*DATA\*/fetch\('data\.json[^\n]*", "D=JSON.parse(document.getElementById('data').textContent);init();", body, count=1)
 import re as _re
-body=_re.sub(r"/\*BOT\*/fetch\('bot/state\.json'\)[^\n]*", "B=JSON.parse(document.getElementById('botdata').textContent);bot();livePrices();setInterval(livePrices,60000);", body, count=1)
+body=_re.sub(r"/\*BOT\*/fetch\('bot/state\.json[^\n]*", "B=JSON.parse(document.getElementById('botdata').textContent);bot();livePrices();setInterval(livePrices,60000);", body, count=1)
 body=body.replace("<script>",'<script id="data" type="application/json">'+inline("docs/data.json")+'</script>\n<script id="botdata" type="application/json">'+inline("docs/bot/state.json")+'</script>\n<script>',1)
 assert "fetch('data.json')" not in body and "fetch('bot/state.json')" not in body, "data fetch left in body"
 open(sys.argv[1],"w",encoding="utf-8").write(head.strip()+"\n"+body.strip()+"\n")
