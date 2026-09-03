@@ -16,9 +16,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.join(ROOT, "docs", "bot", "state.json")
 SYMBOLS = ["BTC", "ETH", "SOL", "BNB", "XRP", "LINK", "AVAX"]
 TF, TF_MS = "4h", 4 * 3600 * 1000
-CFG = dict(start_equity=500.0, risk_per_trade=0.01, max_positions=3, max_position_pct=0.33, daily_loss_limit=0.03,
+CFG = dict(start_equity=500.0, risk_per_trade=0.01, max_positions=7, max_position_pct=0.14, daily_loss_limit=0.03,
            fee=0.001, slippage=0.0005, ema_fast=50, ema_slow=200, rsi_len=14, rsi_entry=50, rsi_lookback=3,
-           atr_len=14, atr_stop_mult=3.0, rr=2.0, vol_len=20, warm_start_days=30)
+           atr_len=14, atr_stop_mult=3.0, rr=2.0, vol_len=20, warm_start_days=0)   # 0 = без предыстории, только реальное время
 HOSTS = ["https://data-api.binance.vision", "https://api.binance.com"]
 
 
@@ -140,13 +140,24 @@ def run():
         save(st); return
     first_run = not st["last_bar"]
     if first_run:
-        warm_from = now_ms() - CFG["warm_start_days"] * 86400_000
-        for s, f in frames.items():
-            st["last_bar"][s] = int(f["ts"][f["ts"] < warm_from].iloc[-1]) if (f["ts"] < warm_from).any() else int(f["ts"].iloc[0])
-        st["live_from"] = now_ms(); st["started"] = warm_from
-        if "BTC" in frames:
-            st["btc_start"] = float(frames["BTC"].loc[frames["BTC"]["ts"] > warm_from, "close"].iloc[0])
-        log(st, warm_from, f"старт симуляции: {CFG['start_equity']:.0f} $, первые {CFG['warm_start_days']} дней рассчитаны по истории")
+        if CFG["warm_start_days"] > 0:
+            warm_from = now_ms() - CFG["warm_start_days"] * 86400_000
+            for s, f in frames.items():
+                st["last_bar"][s] = int(f["ts"][f["ts"] < warm_from].iloc[-1]) if (f["ts"] < warm_from).any() else int(f["ts"].iloc[0])
+            st["live_from"] = now_ms(); st["started"] = warm_from
+            if "BTC" in frames:
+                st["btc_start"] = float(frames["BTC"].loc[frames["BTC"]["ts"] > warm_from, "close"].iloc[0])
+            log(st, warm_from, f"старт симуляции: {CFG['start_equity']:.0f} $, первые {CFG['warm_start_days']} дней рассчитаны по истории")
+        else:
+            # без предыстории: все уже закрытые свечи считаются прошлым, сделки только по новым
+            for s, f in frames.items():
+                st["last_bar"][s] = int(f["ts"].iloc[-1])
+            st["live_from"] = st["started"] = now_ms()
+            try:
+                st["btc_start"] = price("BTC")
+            except Exception:
+                st["btc_start"] = last_close.get("BTC")
+            log(st, now_ms(), f"старт симуляции: {CFG['start_equity']:.0f} $, без предыстории — все сделки только в реальном времени")
 
     # все новые закрытые свечи по всем монетам — в хронологическом порядке
     events = []
@@ -185,7 +196,7 @@ def run():
 
     # текущая оценка по последним ценам
     marks = dict(last_close)
-    for s in list(st["positions"]):
+    for s in set(list(st["positions"]) + ["BTC"]):   # BTC всегда по живой цене — для честного buy&hold
         try:
             marks[s] = price(s)
         except Exception as e:
