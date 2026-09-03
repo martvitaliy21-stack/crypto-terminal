@@ -167,9 +167,10 @@ def run():
             events.append((int(f["ts"].iloc[k]), s, int(k)))
     events.sort()
     def closes_at(ts):
-        return {x: float(frames[x].loc[frames[x]["ts"] <= ts, "close"].iloc[-1]) for x in frames if (frames[x]["ts"] <= ts).any()}
+        return {x: float(frames[x].loc[frames[x]["ts"] + TF_MS <= ts, "close"].iloc[-1]) for x in frames if (frames[x]["ts"] + TF_MS <= ts).any()}
     prev_ts = None
-    for ts, s, k in events:
+    for bar_ts, s, k in events:
+        ts = bar_ts + TF_MS   # момент закрытия свечи
         if prev_ts is not None and ts != prev_ts:
             snap(st, prev_ts, closes_at(prev_ts))
         prev_ts = ts
@@ -190,7 +191,7 @@ def run():
             st["paused_until"] = ts + 86400_000; log(st, ts, f"🛑 дневной убыток {st['day_pnl']:+.2f} $: пауза на 24 часа")
         if s not in st["positions"] and not st["paused_until"] and len(st["positions"]) < CFG["max_positions"] and bool(row["entry"]):
             open_position(st, s, row, ts, equity_value(st, closes_at(ts)))
-        st["last_bar"][s] = ts
+        st["last_bar"][s] = bar_ts
     if prev_ts is not None:
         snap(st, prev_ts, closes_at(prev_ts))
 
