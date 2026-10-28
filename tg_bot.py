@@ -36,6 +36,8 @@ TICK = {"BTC": 2, "ETH": 2, "SOL": 2, "BNB": 2, "XRP": 4, "LINK": 3, "AVAX": 3} 
 STEP = {"BTC": 5, "ETH": 4, "SOL": 3, "BNB": 3, "XRP": 1, "LINK": 2, "AVAX": 2}          # знаков в количестве (шаг лота Binance)
 FEE = 0.001
 RISK_MIN, RISK_MAX = 0.25, 2.0
+MMR = 0.005          # поддерживающая маржа Binance USDT-M для малых позиций
+FUT_MIN = {"BTC": 100, "ETH": 20}   # минимальный объём ордера на фьючерсах, USDT; у остальных 5
 
 
 def now_ms():
@@ -68,7 +70,7 @@ def fernet():
 
 
 def load_priv():
-    base = dict(owner=None, deposit=None, risk=1.0, paused=False, offset=0, sent=[], held=[], taken={}, last_morning=None, last_evening=None)
+    base = dict(owner=None, deposit=None, risk=1.0, market="futures", leverage=3, paused=False, offset=0, sent=[], held=[], taken={}, last_morning=None, last_evening=None)
     if os.path.exists(PRIV):
         try:
             data = json.loads(fernet().decrypt(open(PRIV, "rb").read()).decode())
@@ -183,7 +185,8 @@ def msg_open(p, ev, sz):
     s = ev["sym"]; e = ev["entry"]
     sl, tp, sl_lim, zone = ev["stop"], ev["take"], ev["stop"] * 0.995, ev["chase_max"]
     head = f"<i>свеча 4h закрылась в {hm(ev['signal_ts'])}" + (" ночью — сигнал перепроверен утром" if ev.get("night") else "") + f" · сейчас {hm(ev['ts'])}</i>"
-    L = [f"🟢 <b>СИГНАЛ · {s}/USDT</b> · покупка на споте", head, "",
+    fut = p.get("market") == "futures"
+    L = [f"🟢 <b>СИГНАЛ · {s}/USDT</b> · " + ("LONG на фьючерсах" if fut else "покупка на споте"), head, "",
          f"Вход: <b>по рынку</b>, цена ≈ <code>{px(s, e)}</code>",
          f"Не входить, если цена уже выше <code>{px(s, zone)}</code>", "",
          f"🛑 Стоп-лосс: <code>{px(s, sl)}</code>  ({pct(sl / e - 1)})",
@@ -194,13 +197,30 @@ def msg_open(p, ev, sz):
             L.append(f"💰 Свободных средств почти нет — по правилам риска эту сделку лучше пропустить.")
         else:
             L += [f"💰 Риск {sz['risk_pct']:g}% депозита = <b>{usd(sz['risk_usd'])}</b>",
-                  f"Купить на <b>{sz['value']:.2f} USDT</b> ≈ {qty(s, sz['qty'])} {s} ({sz['frac'] * 100:.0f}% депозита)" + (" — урезано до свободных средств" if sz.get("capped") else "")]
+                  (f"Объём позиции ≈ {qty(s, sz['qty'])} {s}" if fut else f"Купить на <b>{sz['value']:.2f} USDT</b> ≈ {qty(s, sz['qty'])} {s} ({sz['frac'] * 100:.0f}% депозита)") + (" — урезано до свободных средств" if sz.get("capped") else "")]
     else:
         L += [f"💰 Риск {sz['risk_pct']:g}% депозита → позиция <b>{sz['frac'] * 100:.0f}% депозита</b>",
               "Чтобы бот считал сумму в долларах, пришли депозит: <code>/deposit 1000</code>"]
-    L += ["", "На Binance: купить по рынку, затем сразу <b>OCO на продажу</b> всего купленного:",
+    if p.get("market") == "futures":
+        stop_d = 1 - sl / e
+        safe = max(1, int(1 / (stop_d + MMR + 0.01)))          # ликвидация гарантированно ниже стопа
+        lev = min(int(p.get("leverage") or 1), safe)
+        liq = e * (1 - 1 / lev + MMR)
+        L += ["", f"<b>Фьючерсы USDT-M · LONG · Isolated · плечо {lev}x</b>" + (f" (твоё {p['leverage']}x урезано: при нём ликвидация выше стопа)" if lev < int(p.get('leverage') or 1) else ""),
+              f"Макс. безопасное плечо для этой сделки: {safe}x. Ликвидация ≈ <code>{px(s, liq)}</code> — ниже стопа.",]
+        if sz.get("value") is not None:
+            L.append(f"Размер позиции <b>{sz['value']:.2f} USDT</b>, маржа ≈ <b>{sz['value'] / lev:.2f} USDT</b>")
+            mn = FUT_MIN.get(s, 5)
+            if sz["value"] < mn:
+                L.append(f"⚠️ Минимальный ордер по {s} на фьючерсах {mn} USDT — эту сделку по правилам риска лучше пропустить.")
+        L += ["Открыть по рынку, затем сразу поставить TP/SL на всю позицию (Reduce Only):",
+              f"· Take Profit: <code>{px(s, tp)}</code>", f"· Stop Loss: <code>{px(s, sl)}</code> (Mark Price)",
+              "<i>Плечо не увеличивает риск — его задаёт стоп. Риск растёт, только если увеличить размер позиции.</i>"]
+    else:
+      L += ["", "На Binance: купить по рынку, затем сразу <b>OCO на продажу</b> всего купленного:",
           f"· тейк-профит (лимит): <code>{px(s, tp)}</code>",
-          f"· стоп-лосс: триггер <code>{px(s, sl)}</code>, лимит <code>{px(s, sl_lim)}</code>",
+          f"· стоп-лосс: триггер <code>{px(s, sl)}</code>, лимит <code>{px(s, sl_lim)}</code>",]
+    L += [
           "Дальше ничего не двигать — бот напишет, когда сделка закроется.",
           f"<i>#{s} · сигнал механической стратегии v3, не персональная рекомендация</i>"]
     return "\n".join(L)
@@ -269,7 +289,8 @@ HELP = ("<b>Как работает бот</b>\n"
         "/status — открытые сделки и счёт стратегии\n"
         "/deposit 1000 — депозит в USDT для расчёта суммы\n"
         "/risk 1 — риск на сделку, от 0.25 до 2%\n"
-        "/pause и /resume — остановить и возобновить новые сигналы\n\n"
+        "/pause и /resume — остановить и возобновить новые сигналы\n"
+        "/futures или /spot — где торгуешь; /leverage 3 — плечо для фьючерсов\n\n"
         f"Все сделки стратегии видны на сайте: {SITE}\n"
         "<i>Сигналы механической стратегии, не персональная инвестиционная рекомендация. Решение и риск — твои.</i>")
 
@@ -303,6 +324,7 @@ def status_text(p, st):
     L = [f"📊 <b>Статус</b> · {dm(now_ms())}"]
     dep = f"{usd(p['deposit'])}" if p.get("deposit") else "не указан (/deposit 1000)"
     L.append(f"Депозит: {dep} · риск {p['risk']:g}% на сделку · сигналы: {'⏸ на паузе' if p['paused'] else 'включены'}")
+    L.append("Рынок: " + (f"фьючерсы, плечо до {p.get('leverage')}x" if p.get("market") == "futures" else "спот"))
     rows, used, risk = positions_block(p, st, live)
     if rows:
         L.append(f"\nОткрыто у тебя: {len(rows)} {plural(len(rows), 'сделка', 'сделки', 'сделок')}" +
@@ -363,6 +385,17 @@ def handle_updates(p, st):
             send(cid, HELP)
         elif cmd == "/status":
             send(cid, status_text(p, st))
+        elif cmd == "/leverage":
+            try:
+                v = int(float(arg.rstrip("xх")))
+                if not 1 <= v <= 20: raise ValueError
+                p["leverage"] = v; p["market"] = "futures"
+                send(cid, f"Фьючерсы, плечо до {v}x. В каждом сигнале бот всё равно урежет плечо, если при нём ликвидация оказалась бы выше стопа.")
+            except ValueError:
+                send(cid, "Укажи плечо от 1 до 20, например: <code>/leverage 3</code>")
+        elif cmd in ("/spot", "/futures"):
+            p["market"] = cmd[1:]
+            send(cid, "Режим: " + ("спот, OCO-ордер." if cmd == "/spot" else f"фьючерсы USDT-M, плечо до {p.get('leverage', 3)}x."))
         elif cmd == "/pause":
             p["paused"] = True
             send(cid, "⏸ Новые сигналы на паузе. Об уже открытых сделках бот продолжит сообщать. Включить: /resume")
