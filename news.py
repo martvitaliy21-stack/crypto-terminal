@@ -50,7 +50,7 @@ HUBS = {
     "zurich":   (r"swiss|switzerland|zurich|\bubs\b|nestl|franc\b", [("Google News · Schweiz", gnews("de", "CH", "CH:de"))]),
     "warsaw":   (r"poland|polish|warsaw|zloty|złoty", [("Google News · Polska", gnews("pl", "PL", "PL:pl"))]),
     "kyiv":     (r"ukrain|kyiv|kiev|zelensk|\bnbu\b|hryvnia|укра[їи]н|ки[їе]в|нбу|гривн",
-                 [("Google News · Україна", gnews("uk", "UA", "UA:uk")), ("Економічна правда", "https://www.epravda.com.ua/rss/"),
+                 [("Google News · Україна", gnews("uk", "UA", "UA:uk")), ("Економічна правда", "https://www.epravda.com.ua/rss/"), ("Google News · Економічна правда", gsearch("site:epravda.com.ua", "uk", "UA", "UA:uk")),
                   ("Інтерфакс-Україна", "https://interfax.com.ua/news/economic.rss"), ("AIN", "https://ain.ua/feed/"),
                   ("Google News · крипто UA", gsearch("криптовалюта OR біткоїн OR блокчейн", "uk", "UA", "UA:uk"))]),
     "istanbul": (r"turk|istanbul|erdogan|lira", [("Google News · Türkiye", gnews("tr", "TR", "TR:tr"))]),
