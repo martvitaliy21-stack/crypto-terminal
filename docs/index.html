@@ -103,6 +103,48 @@ body.nohelp .help,body.nohelp .intro{display:none}
 footer{padding:12px 14px 20px;color:var(--muted);font:11.5px/1.6 var(--sans);border-top:1px solid var(--border);margin-top:4px}
 footer b{color:var(--text)}
 abbr{text-decoration:underline dotted;cursor:help}
+/* ---- заставка ---- */
+#splash{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:pointer;transition:opacity .6s ease;padding:20px}
+#splash.out{opacity:0;pointer-events:none}
+#splash canvas{display:block;max-width:92vw;opacity:.95}
+#splash .wm{font:700 46px/1 var(--serif);color:var(--accent);letter-spacing:.32em;text-align:center;animation:brandIn 1.4s cubic-bezier(.2,.7,.2,1) both;margin-left:.32em}
+#splash .wm small{display:block;font:500 11px/1 var(--mono);color:var(--muted);letter-spacing:.45em;margin-top:12px}
+#splash .log{font:11px/1.8 var(--mono);color:var(--muted);width:320px;max-width:90vw;min-height:7.2em}
+#splash .log div{animation:fadeIn .35s both} #splash .log b{color:var(--up);font-weight:600;margin-right:6px} #splash .log .neg{margin-right:6px}
+#splash .sp-bar{width:320px;max-width:90vw;height:2px;flex:none;background:var(--border);overflow:hidden} #splash .sp-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .45s ease}
+#splash .skip{font-size:10px;color:var(--muted);letter-spacing:.12em;opacity:.7}
+@keyframes brandIn{0%{opacity:0;letter-spacing:.9em;filter:blur(6px)}100%{opacity:1;letter-spacing:.32em;filter:none}}
+@media(prefers-reduced-motion:reduce){#splash{display:none}}
+/* ---- мир · новости ---- */
+.world-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,430px);gap:10px;padding:8px 10px}
+.world-map{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.world-map canvas{display:block;cursor:crosshair} .world-map canvas.hub{cursor:pointer}
+.world-tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--border);padding:6px 9px;font-size:11px;max-width:300px;z-index:3;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.world-tip b{color:var(--accent)} .world-tip .t{color:var(--text);margin-top:4px;font:12px/1.4 var(--sans)} .world-tip .d{color:var(--muted);margin-top:2px}
+.world-legend{position:absolute;left:8px;bottom:6px;display:flex;gap:14px;font-size:10px;color:var(--muted);flex-wrap:wrap;pointer-events:none}
+.world-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);vertical-align:middle;margin-right:5px}
+.world-legend i.lg-pulse{box-shadow:0 0 0 3px rgba(var(--accent-rgb),.25)}
+.news-side{display:flex;flex-direction:column;min-width:0;max-height:600px}
+.news-head{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap;font-size:11px}
+.news-head select{max-width:100%;cursor:pointer} .news-head a{color:var(--accent);cursor:pointer;text-decoration:none}
+.news-list{overflow:auto;flex:1;min-height:0;border-top:1px solid var(--border)}
+.news-item{display:block;padding:7px 4px;border-bottom:1px solid var(--grid);text-decoration:none;color:var(--text)}
+.news-item:hover{background:var(--panel2)}
+.news-item .m{font-size:10px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.news-item .m .src{color:var(--accent);font-weight:600} .news-item .m .new{color:var(--up);font-weight:600}
+.news-item .t{font:12.5px/1.4 var(--sans);margin-top:2px}
+.tag{border:1px solid var(--border);border-radius:2px;padding:0 5px;font-size:9.5px;letter-spacing:.05em;color:var(--muted)}
+.tag.hub{cursor:pointer} .tag.hub:hover{color:var(--accent);border-color:var(--accent)}
+.news-empty{padding:14px 6px;color:var(--muted);font:12px/1.5 var(--sans)}
+.ticker{overflow:hidden;border-bottom:1px solid var(--border);background:var(--help-bg);white-space:nowrap;position:relative;padding-left:52px}
+.ticker:before{content:'LIVE';position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;padding:0 10px;background:var(--accent);color:var(--on-accent);font-size:9px;font-weight:700;letter-spacing:.15em;z-index:2}
+.tape{display:inline-flex;padding:5px 0;font-size:11px;animation:tape var(--tape-dur,120s) linear infinite;will-change:transform}
+.ticker:hover .tape{animation-play-state:paused}
+.tape .half{display:inline-flex} .tape span{margin-right:38px;white-space:nowrap} .tape b{color:var(--accent);font-weight:600;margin-right:6px} .tape i{font-style:normal;color:var(--muted);margin-right:6px}
+.tape a{color:var(--text);text-decoration:none} .tape a:hover{color:var(--accent)}
+@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.tape{animation:none}.ticker{overflow-x:auto}}
+@media(max-width:1200px){.world-grid{grid-template-columns:1fr}.news-side{max-height:440px}}
 @media(prefers-reduced-motion:no-preference){
  .btns button,.tgl,.skins button{transition:color .15s,border-color .15s,background .15s}
  body.boot header{animation:fadeIn .5s ease-out both}
@@ -117,6 +159,13 @@ abbr{text-decoration:underline dotted;cursor:help}
 </style>
 </head>
 <body>
+<div id="splash" role="presentation" aria-hidden="true">
+  <canvas id="splashMap"></canvas>
+  <div class="wm">ГРОШ<small>TERMINAL</small></div>
+  <div class="log" id="splashLog"></div>
+  <div class="sp-bar"><i id="splashBar"></i></div>
+  <div class="skip">НАЖМИТЕ, ЧТОБЫ ПРОПУСТИТЬ</div>
+</div>
 <header>
   <span class="brand">ГРОШ<small>TERMINAL</small></span><span class="beta">BETA</span>
   <span class="kv">BTC <b id="hBtc">—</b></span>
@@ -129,8 +178,30 @@ abbr{text-decoration:underline dotted;cursor:help}
   <div class="intro">
     <b>Что это.</b> Терминал показывает, как криптовалюты связаны друг с другом и с биткоином, и куда статистически «тянет» цену каждой монеты.
     Всё считается по дневным ценам Binance за последний год, данные обновляются каждый час. Кликни на монету в списке слева или на строку тепловой карты — все панели пересчитаются под неё.
-    Кнопка «пояснения» справа вверху прячет подсказки, когда они уже не нужны.
+    Кнопка «пояснения» справа вверху прячет подсказки, когда они уже не нужны. Раздел «Мир» — карта финансовых центров с живыми новостями: клик по точке показывает, что пишут местные и мировые издания об экономике, биржах и криптовалютах региона.
     <span class="warn">Важно: прогнозные линии — это продолжение прошлого тренда по формуле, а не предсказание будущего. Это инструмент для понимания, а не сигнал купить или продать.</span>
+  </div>
+
+  <div class="panel full" id="worldPanel">
+    <h3>МИР · НОВОСТИ <span class="badge" id="newsStatus">загрузка…</span><span class="sp"></span>
+      <span class="btns" id="newsCats"><button data-c="all" class="on">всё</button><button data-c="crypto">крипто</button><button data-c="stocks">акции</button><button data-c="macro">экономика</button><button data-c="commodities">сырьё</button><button data-c="tech">технологии</button></span>
+      <button class="tgl" id="newsRefresh" type="button" title="подтянуть последний выпуск новостей">обновить ↻</button></h3>
+    <div class="ticker" id="ticker"><div class="tape" id="tape"></div></div>
+    <div class="world-grid">
+      <div class="world-map" id="worldMap"><canvas id="world"></canvas><div class="world-tip" id="worldTip" hidden></div>
+        <div class="world-legend"><span><i class="lg-pulse"></i>новости за последние 3 часа</span><span><i class="lg-dot"></i>размер точки — новостей за сутки</span><span>клик по точке — регион · по океану — весь мир</span></div></div>
+      <div class="news-side">
+        <div class="news-head"><select id="hubSel" class="tgl"></select><span id="newsTitle" class="dim"></span></div>
+        <div class="news-list" id="newsList"><div class="news-empty">загрузка новостей…</div></div>
+      </div>
+    </div>
+    <div class="help">
+      <p><b>Что это.</b> Карта 26 финансовых центров мира. Каждая точка — регион; размер точки — сколько новостей по нему вышло за сутки, пульсирующее кольцо — есть новости за последние три часа. Клик по точке открывает в правой колонке новости региона: местные издания на местном языке плюс мировые ленты, где этот регион упомянут. Клик по океану возвращает ленту «весь мир». Дуги между центрами — главные торговые связи: Нью-Йорк, Лондон, Франкфурт, Дубай, Сингапур, Гонконг, Токио; бегущие по ним огоньки — просто пульс, а не данные.</p>
+      <p><b>Откуда новости.</b> Мировые ленты: BBC Business и BBC Technology, CNBC, CoinDesk, Cointelegraph, WSJ Markets, MarketWatch, Financial Times. Для Украины — Економічна правда, Інтерфакс-Україна, AIN и Google News Україна. Для остальных стран — Google News в местном языке, то есть агрегатор локальных изданий: Handelsblatt во Франкфурте, 日本経済新聞 в Токио, Gulf News в Дубае, Folha в Сан-Паулу. Заголовки не переводятся и не редактируются; ссылка всегда ведёт на оригинал у издателя. Терминал ничего не пишет сам — он только показывает, кто и что опубликовал.</p>
+      <p><b>Категории</b> определяются по ключевым словам в заголовке: <em>крипто</em> — биткоин, ETH, стейблкоины, биржи; <em>акции</em> — индексы, отчётности, IPO; <em>экономика</em> — ставки, инфляция, центробанки, тарифы; <em>сырьё</em> — нефть, газ, золото; <em>технологии</em> — ИИ, чипы, стартапы. Остальное остаётся в «всё». Фильтр действует и на карту: при выборе «крипто» размер точек пересчитывается по крипто-новостям — сразу видно, где эта тема живёт.</p>
+      <p><b>Обновление.</b> Выпуск собирается на сервере каждые 30 минут из 41 источника (время последней сборки — в значке заголовка). Кнопка «обновить» и клик по любой точке подтягивают последний выпуск; строка LIVE сверху — самые свежие заголовки по всему миру. Если источник временно не отвечает, его прошлые новости остаются на карте до 72 часов и помечены временем выхода.</p>
+      <p><b>Зачем это рядом с ботом.</b> Когда средняя корреляция в шапке подскакивает выше 0.7, причина почти всегда здесь: одна тема — ставка ФРС, тарифы, обвал на азиатских биржах — одновременно во всех хабах. Карта показывает, откуда пришёл шок и насколько он глобальный, а бот в это время держит риск портфеля в пределах 3%.</p>
+    </div>
   </div>
 
   <div class="panel full" id="botPanel">
@@ -296,20 +367,148 @@ abbr{text-decoration:underline dotted;cursor:help}
 const $=s=>document.querySelector(s);
 let C={};
 function readTheme(){const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
-  C={bg:v('--bg'),panel:v('--panel'),grid:v('--grid'),border:v('--border'),text:v('--muted'),amber:v('--accent'),amberRgb:v('--accent-rgb'),blue:v('--info'),blueRgb:v('--info-rgb'),green:v('--up'),red:v('--down'),white:v('--text'),muted:v('--muted')};}
+  C={light:cs.colorScheme==='light',bg:v('--bg'),panel:v('--panel'),grid:v('--grid'),border:v('--border'),text:v('--muted'),amber:v('--accent'),amberRgb:v('--accent-rgb'),blue:v('--info'),blueRgb:v('--info-rgb'),green:v('--up'),red:v('--down'),white:v('--text'),muted:v('--muted')};}
 const SKINS={graphite:'Графит',vault:'Сейф',paper:'Бумага'};
 function applySkin(name,persist){if(!SKINS[name])name='graphite';document.documentElement.dataset.skin=name;if(persist){try{localStorage.setItem('grosh_skin_v2',name);}catch(e){}}
   document.querySelectorAll('#skins button').forEach(b=>b.classList.toggle('on',b.dataset.skin===name));if(D)render();}
 (function(){let sk=null;try{localStorage.removeItem('grosh_skin');sk=new URLSearchParams(location.search).get('skin')||localStorage.getItem('grosh_skin_v2');}catch(e){}document.documentElement.dataset.skin=SKINS[sk]?sk:'graphite';})();
-let D, B=null, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
+let D, B=null, WORLD=null, N=null, sel='BTC', win=90, corrWin=90, layers={reg:true,cone:true,log:true}, sortK='corr90', sortDir=-1;
 const fmtP=v=>v>=1000?v.toLocaleString('en',{maximumFractionDigits:0}):v>=1?v.toFixed(v>=100?1:v>=10?2:3):v.toPrecision(3);
 const pct=(v,d=1)=>v==null?'—':Math.abs(v)>999?(v>0?'>+999%':'<-999%'):(v>0?'+':'')+v.toFixed(d)+'%';
 const cls=v=>v>0?'pos':v<0?'neg':'';
 const dpr=()=>window.devicePixelRatio||1;
 function setup(cv){const h=+(cv.dataset.h||(cv.dataset.h=cv.getAttribute('height')));const w=cv.parentElement.clientWidth-20;cv.style.height=h+'px';cv.style.width=w+'px';cv.width=w*dpr();cv.height=h*dpr();const g=cv.getContext('2d');g.setTransform(dpr(),0,0,dpr(),0,0);g.clearRect(0,0,w,h);return [g,w,h];}
 
-/*DATA*/fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{D=d;init();});
-/*BOT*/fetch('bot/state.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(b=>{B=b;bot();livePrices();setInterval(livePrices,60000);}).catch(()=>{const e=$('#botStatus');e.textContent='нет данных';e.dataset.level='bad';});
+// ---------- заставка ----------
+const SPLASH={t0:performance.now(),min:(()=>{try{const seen=sessionStorage.getItem('grosh_splash');sessionStorage.setItem('grosh_splash','1');return seen?900:2200;}catch(e){return 2200;}})(),steps:{world:'карта мира · 5 206 точек суши',data:'свечи 20 монет · корреляции · регрессии',bot:'паперный бот · 500 $ · позиции',news:'новости · 41 источник · 26 регионов'},done:{},finished:false,skipped:false};
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function splashStep(k,ok){if(SPLASH.done[k]!==undefined)return;SPLASH.done[k]=ok;const log=$('#splashLog');
+  if(log){const d=document.createElement('div');d.innerHTML=(ok?'<b>✓</b>':'<span class="neg">✗</span>')+SPLASH.steps[k]+(ok?'':' — недоступно');log.append(d);}
+  const n=Object.keys(SPLASH.done).length,total=Object.keys(SPLASH.steps).length;const bar=$('#splashBar');if(bar)bar.style.width=Math.round(n/total*100)+'%';splashCheck();}
+function splashCheck(){if(SPLASH.finished)return;const all=Object.keys(SPLASH.done).length>=Object.keys(SPLASH.steps).length,el=performance.now()-SPLASH.t0;
+  if(SPLASH.skipped||(all&&el>=SPLASH.min)||el>8000)splashFinish();else if(all)setTimeout(splashCheck,SPLASH.min-el+30);}
+function splashFinish(){if(SPLASH.finished)return;SPLASH.finished=true;const sp=$('#splash');if(sp){sp.classList.add('out');setTimeout(()=>sp.remove(),650);}
+  if(D)bootAnimation();worldStart();}
+(function(){const sp=$('#splash');if(!sp)return;if(REDUCED){sp.remove();SPLASH.finished=true;return;}sp.onclick=()=>{SPLASH.skipped=true;splashFinish();};setTimeout(splashCheck,8100);})();
+
+// ---------- мир · проекция Natural Earth ----------
+const HUBS=[
+ {id:'nyc',n:'Нью-Йорк',s:'Уолл-стрит · NYSE · Nasdaq',lon:-74.0,lat:40.7,m:1,lbl:1},
+ {id:'dc',n:'Вашингтон',s:'ФРС · SEC · Белый дом',lon:-77.0,lat:38.9},
+ {id:'toronto',n:'Торонто',s:'Канада',lon:-79.4,lat:43.7},
+ {id:'mexico',n:'Мехико',s:'Мексика',lon:-99.1,lat:19.4},
+ {id:'saopaulo',n:'Сан-Паулу',s:'Бразилия · B3',lon:-46.6,lat:-23.5,lbl:1},
+ {id:'buenosaires',n:'Буэнос-Айрес',s:'Аргентина',lon:-58.4,lat:-34.6},
+ {id:'london',n:'Лондон',s:'Сити · Банк Англии · FTSE',lon:-0.1,lat:51.5,m:1,lbl:1},
+ {id:'brussels',n:'Брюссель',s:'Евросоюз · санкции',lon:4.4,lat:50.8},
+ {id:'frankfurt',n:'Франкфурт',s:'ЕЦБ · DAX · Германия',lon:8.7,lat:50.1,m:1},
+ {id:'paris',n:'Париж',s:'Франция · CAC',lon:2.3,lat:48.9},
+ {id:'zurich',n:'Цюрих',s:'Швейцария · UBS',lon:8.5,lat:47.4},
+ {id:'warsaw',n:'Варшава',s:'Польша',lon:21.0,lat:52.2},
+ {id:'kyiv',n:'Київ',s:'Україна · НБУ',lon:30.5,lat:50.5,m:1,lbl:1},
+ {id:'istanbul',n:'Стамбул',s:'Турция · лира',lon:29.0,lat:41.0},
+ {id:'dubai',n:'Дубай',s:'ОАЭ · крипто-хаб',lon:55.3,lat:25.2,m:1,lbl:1},
+ {id:'riyadh',n:'Эр-Рияд',s:'нефть · OPEC · Aramco',lon:46.7,lat:24.7},
+ {id:'mumbai',n:'Мумбаи',s:'Индия · Sensex',lon:72.9,lat:19.1,lbl:1},
+ {id:'singapore',n:'Сингапур',s:'Юго-Восточная Азия',lon:103.8,lat:1.3,m:1,lbl:1},
+ {id:'hongkong',n:'Гонконг',s:'Hang Seng',lon:114.2,lat:22.3,m:1},
+ {id:'shanghai',n:'Шанхай',s:'Китай · биржи',lon:121.5,lat:31.2},
+ {id:'beijing',n:'Пекин',s:'Китай · НБК · юань',lon:116.4,lat:39.9,lbl:1},
+ {id:'tokyo',n:'Токио',s:'Япония · Nikkei · BoJ',lon:139.7,lat:35.7,m:1,lbl:1},
+ {id:'seoul',n:'Сеул',s:'Корея · Samsung',lon:127.0,lat:37.6},
+ {id:'sydney',n:'Сидней',s:'Австралия · ASX',lon:151.2,lat:-33.9,lbl:1},
+ {id:'johannesburg',n:'Йоханнесбург',s:'ЮАР',lon:28.0,lat:-26.2,lbl:1},
+ {id:'lagos',n:'Лагос',s:'Нигерия · Африка',lon:3.4,lat:6.5},
+];
+const ARCS=[['nyc','london'],['london','frankfurt'],['frankfurt','kyiv'],['london','dubai'],['dubai','mumbai'],['dubai','singapore'],['singapore','hongkong'],['hongkong','tokyo'],['tokyo','sydney'],['nyc','saopaulo'],['nyc','mexico']];
+const HUBBY=Object.fromEntries(HUBS.map(h=>[h.id,h]));
+const CATN={all:'всё',crypto:'крипто',stocks:'акции',macro:'экономика',commodities:'сырьё',tech:'технологии',economy:'бизнес'};
+function neProj(lon,lat){const l=lon*Math.PI/180,p=lat*Math.PI/180,p2=p*p,p4=p2*p2;
+  return [l*(0.8707-0.131979*p2-0.013791*p4+0.003971*p4*p4*p2-0.001529*p4*p4*p4),p*(1.007226+p2*(0.015085+p4*(-0.044475+0.028874*p2-0.005916*p4)))];}
+function makeFit(W,H,pad){const xr=neProj(180,0)[0],ymin=neProj(0,-57)[1],ymax=neProj(0,84)[1];const sc=Math.min((W-2*pad)/(2*xr),(H-2*pad)/(ymax-ymin));
+  const ox=W/2,oy=(H-(ymax-ymin)*sc)/2;return (lon,lat)=>{const [x,y]=neProj(lon,lat);return [ox+x*sc,oy+(ymax-y)*sc];};}
+function canvasSize(cv,w,h){const d=window.devicePixelRatio||1;cv.style.width=w+'px';cv.style.height=h+'px';cv.width=Math.round(w*d);cv.height=Math.round(h*d);const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return g;}
+function drawDots(g,fit,W,alpha,r){if(!WORLD)return;g.fillStyle=`rgba(${C.amberRgb},${alpha})`;for(const [lon,lat] of WORLD.dots){const [x,y]=fit(lon,lat);g.beginPath();g.arc(x,y,r,0,6.2832);g.fill();}}
+function drawGraticule(g,fit){g.strokeStyle=`rgba(${C.amberRgb},.07)`;g.lineWidth=1;g.setLineDash([2,4]);
+  for(let lon=-180;lon<=180;lon+=30){g.beginPath();for(let lat=-57;lat<=84;lat+=3){const [x,y]=fit(lon,lat);lat===-57?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();}
+  for(let lat=-30;lat<=60;lat+=30){g.beginPath();for(let lon=-180;lon<=180;lon+=5){const [x,y]=fit(lon,lat);lon===-180?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();}g.setLineDash([]);}
+
+// ---------- заставка: карта проявляется слева направо ----------
+let splashAnim=null;
+function splashDraw(){const cv=$('#splashMap');if(!cv||!WORLD||SPLASH.finished||REDUCED)return;readTheme();
+  const w=Math.min(Math.round(window.innerWidth*0.86),760),h=Math.round(w/2.3);const g=canvasSize(cv,w,h),fit=makeFit(w,h,6);
+  const pts=WORLD.dots.map(([lon,lat])=>fit(lon,lat)),hubs=HUBS.map(hb=>fit(hb.lon,hb.lat)),t0=performance.now(),dur=1500;
+  const step=now=>{if(SPLASH.finished)return;const p=Math.min(1,(now-t0)/dur),sweep=p*(w+60)-30;g.clearRect(0,0,w,h);
+    g.fillStyle=`rgba(${C.amberRgb},.75)`;for(const [x,y] of pts){if(x<=sweep){const k=Math.min(1,(sweep-x)/60);g.globalAlpha=.25+.75*k;g.beginPath();g.arc(x,y,1.3,0,6.2832);g.fill();}}
+    g.globalAlpha=1;hubs.forEach(([x,y],i)=>{if(x<=sweep){const k=Math.min(1,(sweep-x)/120);g.fillStyle=`rgba(${C.amberRgb},${.9})`;g.beginPath();g.arc(x,y,2.4,0,6.2832);g.fill();
+      g.strokeStyle=`rgba(${C.amberRgb},${(1-k)*.8})`;g.lineWidth=1;g.beginPath();g.arc(x,y,3+k*14,0,6.2832);g.stroke();}});
+    if(p<1){const grd=g.createLinearGradient(sweep-40,0,sweep,0);grd.addColorStop(0,`rgba(${C.amberRgb},0)`);grd.addColorStop(1,`rgba(${C.amberRgb},.35)`);g.fillStyle=grd;g.fillRect(sweep-40,0,40,h);g.fillStyle=`rgba(${C.amberRgb},.9)`;g.fillRect(sweep,0,1,h);}
+    if(p<1||!SPLASH.finished&&now-t0<dur+4000)splashAnim=requestAnimationFrame(step);};
+  splashAnim=requestAnimationFrame(step);}
+
+// ---------- мир: карта новостей ----------
+const WM={layer:null,fit:null,W:0,H:0,pos:{},hover:null,sel:null,cat:'all',visible:false,raf:null,lastRefresh:0};
+function worldReady(){Promise.resolve().then(()=>{splashDraw();worldResize();});}
+function newsReady(){Promise.resolve().then(()=>{renderNews();worldDraw(performance.now());});}
+function newsFail(){const e=$('#newsStatus');if(e){e.textContent='новости недоступны';e.dataset.level='bad';}$('#newsList').innerHTML='<div class="news-empty">Выпуск новостей не загрузился. Попробуйте «обновить» через минуту.</div>';}
+function worldResize(){const cv=$('#world'),box=$('#worldMap');if(!cv||!WORLD)return;readTheme();const W=box.clientWidth,H=Math.max(240,Math.min(540,Math.round(W/2.25)));const key=W+'x'+H+':'+document.documentElement.dataset.skin;if(WM.key===key&&WM.layer){worldDraw(performance.now());return;}WM.key=key;WM.W=W;WM.H=H;WM.fit=makeFit(W,H,10);
+  canvasSize(cv,W,H);const off=document.createElement('canvas');const g=canvasSize(off,W,H);drawGraticule(g,WM.fit);drawDots(g,WM.fit,W,C.light?.5:.55,Math.max(.9,W/900*1.25));WM.layer=off;
+  WM.pos={};for(const h of HUBS){const [x,y]=WM.fit(h.lon,h.lat);WM.pos[h.id]={x,y};}worldDraw(performance.now());}
+function hubCounts(){const now=Date.now(),c={},fresh={},last={};if(N)for(const it of N.items){if(!it.h||(WM.cat!=='all'&&it.c!==WM.cat))continue;if(now-it.p<86400000)c[it.h]=(c[it.h]||0)+1;if(now-it.p<3*3600000)fresh[it.h]=1;if(!last[it.h])last[it.h]=it;}return {c,fresh,last};}
+function worldDraw(now){const cv=$('#world');if(!cv||!WM.layer)return;const g=cv.getContext('2d'),{W,H}=WM;g.clearRect(0,0,W,H);g.drawImage(WM.layer,0,0,W,H);
+  const {c,fresh}=hubCounts(),t=now/1000,anim=!REDUCED;
+  // дуги
+  g.lineWidth=1;for(let i=0;i<ARCS.length;i++){const a=WM.pos[ARCS[i][0]],b=WM.pos[ARCS[i][1]];if(!a||!b)continue;const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,d=Math.hypot(b.x-a.x,b.y-a.y),cx=mx,cy=my-d*.22;
+    g.strokeStyle=`rgba(${C.amberRgb},.16)`;g.beginPath();g.moveTo(a.x,a.y);g.quadraticCurveTo(cx,cy,b.x,b.y);g.stroke();
+    if(anim){const u=((t/7)+i*.37)%1,x=(1-u)*(1-u)*a.x+2*(1-u)*u*cx+u*u*b.x,y=(1-u)*(1-u)*a.y+2*(1-u)*u*cy+u*u*b.y;g.fillStyle=`rgba(${C.amberRgb},.18)`;g.beginPath();g.arc(x,y,4,0,6.2832);g.fill();g.fillStyle=`rgba(${C.amberRgb},.95)`;g.beginPath();g.arc(x,y,1.6,0,6.2832);g.fill();}}
+  // хабы
+  g.font='10px "IBM Plex Mono",Menlo,monospace';HUBS.forEach((h,i)=>{const p=WM.pos[h.id];if(!p)return;const n=c[h.id]||0,r=2.6+Math.min(4.6,Math.sqrt(n)*1.15);p.r=r;const isSel=WM.sel===h.id,isHov=WM.hover===h.id;
+    if(fresh[h.id]&&anim){const ph=((t/2.4)+i*.13)%1;g.strokeStyle=`rgba(${C.amberRgb},${(1-ph)*.7})`;g.lineWidth=1.2;g.beginPath();g.arc(p.x,p.y,r+2+ph*16,0,6.2832);g.stroke();}
+    else if(fresh[h.id]){g.strokeStyle=`rgba(${C.amberRgb},.35)`;g.lineWidth=1;g.beginPath();g.arc(p.x,p.y,r+5,0,6.2832);g.stroke();}
+    g.fillStyle=`rgba(${C.amberRgb},${n?.95:.5})`;g.beginPath();g.arc(p.x,p.y,r,0,6.2832);g.fill();
+    if(isSel||isHov){g.strokeStyle=C.white;g.lineWidth=1.5;g.beginPath();g.arc(p.x,p.y,r+3,0,6.2832);g.stroke();}
+    if((h.lbl&&W>760)||isSel||isHov){const label=h.n+(n?' '+n:'');const tw=g.measureText(label).width;const left=p.x+r+5+tw>W-6;g.textAlign=left?'right':'left';g.fillStyle=isSel||isHov?C.white:C.muted;g.fillText(label,left?p.x-r-5:p.x+r+5,p.y+3.5);}});
+  if(!WM.visible||REDUCED){WM.raf=null;return;}WM.raf=requestAnimationFrame(worldDraw);}
+function worldStart(){const box=$('#worldMap');if(!box)return;const kick=()=>{if(WM.visible&&!WM.raf&&!REDUCED)WM.raf=requestAnimationFrame(worldDraw);};
+  if('IntersectionObserver' in window){new IntersectionObserver(es=>{WM.visible=es.some(e=>e.isIntersecting);kick();},{threshold:.05}).observe(box);}else{WM.visible=true;kick();}
+  const cv=$('#world'),tip=$('#worldTip');
+  const hit=e=>{const b=cv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;let best=null,bd=16;for(const h of HUBS){const p=WM.pos[h.id];if(!p)continue;const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;best=h;}}return [best,x,y];};
+  cv.onmousemove=e=>{const [h,x,y]=hit(e);const prev=WM.hover;WM.hover=h?h.id:null;cv.classList.toggle('hub',!!h);if(h){const {c,last}=hubCounts();const n=c[h.id]||0,l=last[h.id];
+      tip.innerHTML=`<b>${h.n}</b> <span class="dim">${h.s}</span><div class="d">${n?n+' '+plural(n,'новость','новости','новостей')+' за сутки':'за сутки новостей нет'}${l?' · последняя '+agoShort(l.p):''}</div>${l?`<div class="t">${esc(l.t)}</div><div class="d">${esc(l.s)}</div>`:''}`;
+      tip.hidden=false;const tw=tip.offsetWidth,th=tip.offsetHeight;tip.style.left=Math.min(x+14,WM.W-tw-4)+'px';tip.style.top=(y+14+th>WM.H?y-th-10:y+14)+'px';}else tip.hidden=true;
+    if(prev!==WM.hover&&(REDUCED||!WM.raf))worldDraw(performance.now());};
+  cv.onmouseleave=()=>{WM.hover=null;tip.hidden=true;if(REDUCED||!WM.raf)worldDraw(performance.now());};
+  cv.onclick=e=>{const [h]=hit(e);selectHub(h?h.id:null);newsRefresh(true);};
+  $('#hubSel').onchange=e=>selectHub(e.target.value||null);
+  $('#newsCats').querySelectorAll('button').forEach(b=>b.onclick=()=>{WM.cat=b.dataset.c;$('#newsCats').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderNews();if(REDUCED||!WM.raf)worldDraw(performance.now());});
+  $('#newsRefresh').onclick=()=>newsRefresh(false);if(window.SNAPSHOT)$('#newsRefresh').hidden=true;
+  worldResize();}
+function selectHub(id){WM.sel=id;const sl=$('#hubSel');if(sl&&sl.value!==(id||''))sl.value=id||'';renderNews();if(REDUCED||!WM.raf)worldDraw(performance.now());}
+const plural=(n,a,b,c)=>{const m=n%10,k=n%100;return k>=11&&k<=14?c:m===1?a:m>=2&&m<=4?b:c;};
+const agoShort=ms=>{const m=Math.max(0,Math.round((Date.now()-ms)/60000));return m<60?m+' мин':m<1440?Math.floor(m/60)+' ч':Math.floor(m/1440)+' д';};
+const esc=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+function renderNews(){const sl=$('#hubSel');if(sl&&!sl.options.length){sl.innerHTML='<option value="">🌐 весь мир</option>'+HUBS.map(h=>`<option value="${h.id}">${h.n} · ${h.s}</option>`).join('');}
+  const st=$('#newsStatus');if(!N){return;}
+  const age=(Date.now()-N.generated)/60000;st.textContent=(window.SNAPSHOT?'снимок от '+fmtD(N.generated):'выпуск '+agoShort(N.generated)+' назад')+` · ${N.sources_ok} из ${N.sources_total} источников`;st.dataset.level=window.SNAPSHOT?'':age<90?'ok':age<300?'warn':'bad';
+  const now=Date.now();const items=N.items.filter(it=>(WM.cat==='all'||it.c===WM.cat)&&(!WM.sel||it.h===WM.sel));
+  const hub=WM.sel?HUBBY[WM.sel]:null;const n=items.length;
+  $('#newsTitle').innerHTML=(hub?`<b>${hub.n}</b> · ${hub.s} · `:'')+`${n} ${plural(n,'новость','новости','новостей')}`+(WM.cat!=='all'?' · '+CATN[WM.cat]:'')+(hub?' · <a id="toWorld">← весь мир</a>':'');
+  const tw=$('#toWorld');if(tw)tw.onclick=()=>selectHub(null);
+  $('#newsList').innerHTML=n?items.slice(0,120).map(it=>{const h=it.h?HUBBY[it.h]:null;return `<a class="news-item" href="${esc(it.u)}" target="_blank" rel="noopener"><div class="m">${now-it.p<3600000?'<span class="new">● новое</span>':''}<span>${agoShort(it.p)} назад</span><span class="src">${esc(it.s)}</span>${h&&!WM.sel?`<span class="tag hub" data-h="${h.id}">${h.n}</span>`:''}${it.c!=='economy'?`<span class="tag">${CATN[it.c]||it.c}</span>`:''}</div><div class="t">${esc(it.t)}</div></a>`;}).join('')
+    :`<div class="news-empty">${hub?'По этому региону':'В этой категории'} за последние трое суток новостей не нашлось. Попробуйте другую категорию или «весь мир».</div>`;
+  $('#newsList').querySelectorAll('.tag.hub').forEach(el=>el.onclick=e=>{e.preventDefault();e.stopPropagation();selectHub(el.dataset.h);});
+  const tape=$('#tape');if(tape){const latest=N.items.slice().sort((a,b)=>b.p-a.p).slice(0,28);const half=latest.map(it=>`<span><b>${esc(it.s)}</b><i>${agoShort(it.p)}</i><a href="${esc(it.u)}" target="_blank" rel="noopener">${esc(it.t)}</a></span>`).join('');
+    tape.innerHTML=`<span class="half">${half}</span><span class="half">${half}</span>`;const chars=latest.reduce((a,it)=>a+it.t.length+it.s.length+8,0);tape.style.setProperty('--tape-dur',Math.max(60,Math.round(chars*.07))+'s');}}
+async function newsRefresh(auto){if(window.SNAPSHOT)return;const btn=$('#newsRefresh');if(auto&&Date.now()-WM.lastRefresh<5*60000)return;WM.lastRefresh=Date.now();
+  if(!auto){btn.disabled=true;btn.textContent='обновляю…';}
+  try{const r=await fetch('news.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const n=await r.json();const fresh=n.generated!==(N&&N.generated);N=n;renderNews();if(REDUCED||!WM.raf)worldDraw(performance.now());
+    if(!auto){btn.textContent=fresh?'обновлено ✓':'это последний выпуск ✓';setTimeout(()=>{btn.textContent='обновить ↻';btn.disabled=false;},1800);}}
+  catch(e){if(!auto){btn.textContent='не удалось';setTimeout(()=>{btn.textContent='обновить ↻';btn.disabled=false;},1800);}}}
+
+/*DATA*/fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{D=d;init();splashStep('data',true);}).catch(()=>splashStep('data',false));
+/*BOT*/fetch('bot/state.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(b=>{B=b;bot();livePrices();setInterval(livePrices,60000);splashStep('bot',true);}).catch(()=>{const e=$('#botStatus');e.textContent='нет данных';e.dataset.level='bad';splashStep('bot',false);});
+/*WORLD*/fetch('world.json').then(r=>r.json()).then(w=>{WORLD=w;splashStep('world',true);worldReady();}).catch(()=>splashStep('world',false));
+/*NEWS*/fetch('news.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(n=>{N=n;splashStep('news',true);newsReady();}).catch(()=>{splashStep('news',false);newsFail();});
 
 function init(){
   $('#hBtc').textContent=fmtP(D.stats.BTC.price);$('#hEth').textContent=fmtP(D.stats.ETH.price);$('#hGen').textContent=D.generated;
@@ -329,10 +528,10 @@ function init(){
   applySkin(document.documentElement.dataset.skin);
   window.addEventListener('resize',()=>render());
   applyHelp();
-  bootAnimation();
+  if(SPLASH.finished)bootAnimation();
 }
 function render(){
-  readTheme();
+  readTheme();worldResize();
   $('#winBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===win+'д'));
   $('#corrBtns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent===corrWin+'д'));
   watchlist();drawMain();heat();links();roll();lag();tv();bot();

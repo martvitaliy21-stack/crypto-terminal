@@ -22,12 +22,14 @@ jobs:
         run: python bot_sim.py
       - name: terminal data
         run: python analyze.py || echo "analyze failed, keeping previous data.json"
+      - name: world news
+        run: python news.py || echo "news failed, keeping previous news.json"
       - name: commit and push (при конфликте пересчитать от свежего состояния)
         run: |
           git config user.name "grosh-bot"
           git config user.email "actions@users.noreply.github.com"
           for i in 1 2 3 4; do
-            git add docs/data.json docs/bot/state.json
+            git add docs/data.json docs/bot/state.json docs/news.json
             if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
             git commit -m "update: $(date -u +'%Y-%m-%d %H:%M UTC')"
             if git push; then exit 0; fi
@@ -36,6 +38,7 @@ jobs:
             git reset --hard origin/main
             python bot_sim.py
             python analyze.py || true
+            python news.py || true
             sleep 5
           done
           exit 1

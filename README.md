@@ -8,6 +8,8 @@
 - `docs/index.html` — сайт, публикуется через GitHub Pages из папки `/docs`.
 - `bot_sim.py` — паперный бот на виртуальные 500 $ (та же стратегия, что у основного бота), состояние в `docs/bot/state.json`.
 - `.github/workflows/update.yml` каждые 30 минут запускает бота и пересчитывает данные; push с повтором при гонке.
+- `news.py` — новости для раздела «Мир»: 41 лента (BBC, CNBC, CoinDesk, Cointelegraph, WSJ, MarketWatch, FT, Економічна правда, Інтерфакс-Україна, AIN, Google News по 20 странам) → `docs/news.json`, 26 хабов, категории.
+- `worldmap.py` — точечная карта суши из Natural Earth 1:110m → `docs/world.json` (запускается один раз).
 - `build_artifact.py out.html` — одностраничная версия с инлайн-данными.
 
 Локально: `pip install -r requirements.txt && python analyze.py && python -m http.server 8766 --directory docs`
