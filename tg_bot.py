@@ -53,6 +53,12 @@ def minutes(ms):
 
 
 def in_work(ms):
+    try:
+        ext = json.load(open(os.path.join(ROOT, "signals", "schedule.json"))).get("extend_until", 0)
+        if ms - 8 * 3600_000 < ext and ms <= ext:      # разовое продление вечера (вечер того же дня → до ext)
+            return True
+    except Exception:
+        pass
     return WORK[0] <= minutes(ms) <= WORK[1]
 
 

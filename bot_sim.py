@@ -54,6 +54,12 @@ def fmt_kyiv(ms):
 
 
 def in_work(ms):
+    try:
+        ext = json.load(open(os.path.join(ROOT, "signals", "schedule.json"))).get("extend_until", 0)
+        if ms - 8 * 3600_000 < ext and ms <= ext:      # разовое продление вечера (вечер того же дня → до ext)
+            return True
+    except Exception:
+        pass
     t = kyiv(ms); m = t.hour * 60 + t.minute
     return CFG["work_from"] <= m <= CFG["work_to"]
 
