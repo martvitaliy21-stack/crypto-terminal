@@ -387,15 +387,20 @@ def run():
     deliver(st, live, now, marks)
     eq = equity_value(st, marks)
     bh = CFG["start_equity"] * marks["BTC"] / st["btc_start"] if st.get("btc_start") and marks.get("BTC") else None
-    if not st["equity"] or st["equity"][-1][0] < now:
-        st["equity"].append([now, round(eq, 4), round(bh, 4) if bh else None])
+    point = [now, round(eq, 4), round(bh, 4) if bh else None]
+    if len(st["equity"]) >= 2 and st["equity"][-1][0] - st["equity"][-2][0] < 25 * 60_000:
+        st["equity"][-1] = point          # прогоны раз в минуту: держим точку не чаще раза в ~25 минут
+    elif not st["equity"] or st["equity"][-1][0] < now:
+        st["equity"].append(point)
     compact_equity(st)
     st["marks"] = {s: marks.get(s) for s in st["positions"]}
     signals(st, f4, eq)
     st["status"].update(last_run=now, last_error="; ".join(errors) if errors else None,
                         errors=st["status"]["errors"] + (1 if errors else 0), symbols_ok=len(f4), events=len(st["events"]))
-    log(st, now, f"капитал {eq:.2f} $  позиций {len(st['positions'])}  ждут {len(st['pending'])}  под риском {heat(st, eq) * 100:.1f}%"
-                 + (f"  ⚠ {len(errors)} ошибок" if errors else ""))
+    last_cap = max((ts for ts, m in st["log"] if m.startswith("капитал")), default=0)
+    if now - last_cap >= 25 * 60_000 or errors:
+        log(st, now, f"капитал {eq:.2f} $  позиций {len(st['positions'])}  ждут {len(st['pending'])}  под риском {heat(st, eq) * 100:.1f}%"
+                     + (f"  ⚠ {len(errors)} ошибок" if errors else ""))
     save(st)
 
 
