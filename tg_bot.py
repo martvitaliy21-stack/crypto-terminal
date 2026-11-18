@@ -121,6 +121,12 @@ def tg(method, **params):
     return None
 
 
+# постоянные кнопки под полем ввода — нажатие отправляет текст кнопки, его переводим в команду
+BUTTONS = {"📊 Статус": "/status", "🌐 Сайт": "/site", "⏸ Пауза": "/pause", "▶️ Включить": "/resume", "❓ Помощь": "/help"}
+KEYBOARD = {"keyboard": [[{"text": "📊 Статус"}, {"text": "🌐 Сайт"}], [{"text": "⏸ Пауза"}, {"text": "▶️ Включить"}, {"text": "❓ Помощь"}]],
+            "resize_keyboard": True, "is_persistent": True}
+
+
 def send(chat_id, text):
     global SENT
     if MODE == "mark":
@@ -129,7 +135,7 @@ def send(chat_id, text):
         print("\n----- сообщение -----\n" + html.unescape(text.replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "").replace("<code>", "").replace("</code>", "")))
         SENT += 1
         return True
-    ok = tg("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", disable_web_page_preview=True) is not None
+    ok = tg("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", disable_web_page_preview=True, reply_markup=KEYBOARD) is not None
     SENT += ok
     return ok
 
@@ -372,6 +378,7 @@ def handle_updates(p, st):
             continue
         n += 1
         cid = chat["id"]; text = (m.get("text") or "").strip(); name = (m.get("from") or {}).get("first_name") or ""
+        text = BUTTONS.get(text, text)
         parts = text.split(); cmd = parts[0].split("@")[0].lower() if parts else ""; arg = parts[1] if len(parts) > 1 else ""
         owner = p.get("owner")
         if cmd == "/start":
@@ -389,6 +396,8 @@ def handle_updates(p, st):
             continue
         if cmd in ("/help", "help"):
             send(cid, HELP)
+        elif cmd == "/site":
+            send(cid, f"🌐 <a href=\"{SITE}\">ГРОШ TERMINAL</a> — графики, сканер монет, сделки бота и карта новостей.")
         elif cmd == "/status":
             send(cid, status_text(p, st))
         elif cmd == "/leverage":
